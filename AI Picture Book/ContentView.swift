@@ -4,18 +4,39 @@
 //
 //  Created by LazyG on 2026/2/6.
 //
+//  根路由：启动页 → OB开始 → OB第 1,2,3,4 页 → 首页 → 绘本页面
+//
 
 import SwiftUI
 
 struct ContentView: View {
+    @State private var appState = AppState.shared
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            switch appState.currentPage {
+            case .splash:
+                SplashView()
+            case .obStart:
+                OBStartView()
+            case .obAge:
+                OBAgePage()
+            case .obGender:
+                OBGenderPage()
+            case .obAvatar:
+                OBAvatarPage()
+            case .obName:
+                OBNamePage()
+            case .home:
+                HomeView()
+            case .storyLoading:
+                StoryLoadingView()
+            case .storyBook:
+                StoryBookView()
+            }
         }
-        .padding()
+        .environment(appState)
+        .animation(.easeInOut(duration: 0.3), value: appState.currentPage)
     }
 }
 
