@@ -11,26 +11,43 @@ import SwiftUI
 enum AppPage: Int, CaseIterable {
     case splash = 0
     case obStart = 1
-    case obAge = 2
-    case obGender = 3
-    case obAvatar = 4
-    case obName = 5
-    case home = 6
-    case storyLoading = 7
-    case storyBook = 8
+    case obTeamIntro = 2
+    case obAge = 3
+    case obAgeMotivation = 4
+    case obGender = 5
+    case obAvatar = 6
+    case obName = 7
+    case obNameMotivation = 8
+    case obRelationship = 9
+    case obRelationshipMotivation = 10
+    case obPersonalizing = 11
+    case paywall = 12
+    case home = 13
+    case storyLoading = 14
+    case storyBook = 15
 }
 
 /// 用户选择年龄段
 enum ChildAge: String, CaseIterable {
-    case age2_3 = "2-3岁"
-    case age4_5 = "4-5岁"
-    case age6_7 = "6-7岁"
+    case under3 = "Under 3"
+    case age3_5 = "3-5"
+    case age6_7 = "6-7"
+    case age8Plus = "8+"
+}
+
+/// 用户与孩子的关系（Who are you to the child?）
+enum ChildRelationship: String, CaseIterable {
+    case mom = "Mom"
+    case dad = "Dad"
+    case grandparent = "Grandparent"
+    case teacher = "Teacher"
+    case other = "Other"
 }
 
 /// 用户选择性别
 enum ChildGender: String, CaseIterable {
-    case boy = "男孩"
-    case girl = "女孩"
+    case boy = "Boy"
+    case girl = "Girl"
 }
 
 /// 头像选项（设计稿中的 6 种）
@@ -82,9 +99,14 @@ final class AppState {
     @AppStorage("childAvatar") var childAvatarRaw: String = ""
     @ObservationIgnored
     @AppStorage("childName") var childName: String = ""
+    @ObservationIgnored
+    @AppStorage("childRelationship") var childRelationshipRaw: String = ""
     
     /// 当前故事主题
     var storyTheme: String = ""
+    
+    /// 当前要查看的已保存故事（从「最近的故事」点击进入时使用）
+    var viewingSavedStory: SavedStory?
     
     var childAge: ChildAge? {
         get { ChildAge(rawValue: childAgeRaw) }
@@ -101,23 +123,32 @@ final class AppState {
         set { childAvatarRaw = newValue?.rawValue ?? "" }
     }
     
+    var childRelationship: ChildRelationship? {
+        get { ChildRelationship(rawValue: childRelationshipRaw) }
+        set { childRelationshipRaw = newValue?.rawValue ?? "" }
+    }
+    
     private init() {}
     
     /// 进入 OB 流程（从启动页或 OB 开始）
     func enterOnboarding() {
         print("[AppState] enterOnboarding")
-        currentPage = .obAge
+        currentPage = .obTeamIntro
     }
     
     /// OB 下一页
     func nextOnboardingPage() {
         switch currentPage {
-        case .obAge: currentPage = .obGender
+        case .obTeamIntro: currentPage = .obAge
+        case .obAge: currentPage = .obAgeMotivation
+        case .obAgeMotivation: currentPage = .obGender
         case .obGender: currentPage = .obAvatar
         case .obAvatar: currentPage = .obName
-        case .obName:
-            hasCompletedOnboarding = true
-            currentPage = .home
+        case .obName: currentPage = .obNameMotivation
+        case .obNameMotivation: currentPage = .obRelationship
+        case .obRelationship: currentPage = .obRelationshipMotivation
+        case .obRelationshipMotivation: currentPage = .obPersonalizing
+        case .obPersonalizing: currentPage = .paywall
         default: break
         }
         print("[AppState] nextOnboardingPage -> \(currentPage)")
@@ -128,6 +159,29 @@ final class AppState {
         hasCompletedOnboarding = true
         currentPage = .home
         print("[AppState] finishOnboarding -> home")
+    }
+
+    /// OB 返回上一页
+    func previousOnboardingPage() {
+        switch currentPage {
+        case .obAge: currentPage = .obTeamIntro
+        case .obAgeMotivation: currentPage = .obAge
+        case .obGender: currentPage = .obAgeMotivation
+        case .obAvatar: currentPage = .obGender
+        case .obName: currentPage = .obAvatar
+        case .obNameMotivation: currentPage = .obName
+        case .obRelationship: currentPage = .obNameMotivation
+        case .obRelationshipMotivation: currentPage = .obRelationship
+        default: break
+        }
+        print("[AppState] previousOnboardingPage -> \(currentPage)")
+    }
+
+    /// Paywall 关闭或订阅完成后进入首页
+    func dismissPaywall() {
+        hasCompletedOnboarding = true
+        currentPage = .home
+        print("[AppState] dismissPaywall -> home")
     }
     
     /// 开始故事创作（从首页点击开始按钮）
@@ -153,7 +207,15 @@ final class AppState {
     /// 从绘本页面返回首页
     func backToHome() {
         currentPage = .home
+        viewingSavedStory = nil
         print("[AppState] backToHome")
+    }
+    
+    /// 查看已保存的故事
+    func viewSavedStory(_ story: SavedStory) {
+        viewingSavedStory = story
+        currentPage = .storyBook
+        print("[AppState] viewSavedStory, 主题：\(story.theme)")
     }
     
     /// 启动页结束后决定跳转

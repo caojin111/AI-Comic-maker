@@ -13,47 +13,81 @@ struct ThemeInputModalView: View {
     @State private var themeText: String = ""
     @FocusState private var isTextFieldFocused: Bool
     
+    // 随机生成描述的数据（英文）
+    private let characters = ["A little cat", "A puppy", "A bunny", "A bird", "A bear", "A little girl", "A little boy", "An elephant", "A deer", "A fox", "A squirrel", "A penguin"]
+    private let locations = ["in the clouds", "in the forest", "by the sea", "in the garden", "in a castle", "in space", "under the sea", "on a rainbow", "on the moon", "among the stars", "in a magic forest", "in a candy house"]
+    private let actions = ["dancing", "singing", "exploring", "flying", "swimming", "reading", "drawing", "playing games", "searching for treasure", "helping friends", "learning magic", "making cakes"]
+    
     var body: some View {
         ZStack {
-            // 遮罩层
+            // 遮罩层（添加淡入动画，让出现更柔和）
             Color.black.opacity(0.5)
                 .ignoresSafeArea()
                 .onTapGesture {
-                    isPresented = false
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        isPresented = false
+                    }
                 }
+                .opacity(isPresented ? 1 : 0)
+                .animation(.easeIn(duration: 0.3), value: isPresented)
             
-            // 弹窗内容
+            // 弹窗内容（添加缩放和淡入动画）
             VStack(spacing: 24) {
                 // 标题
-                Text("输入故事主题")
+                Text("Enter Story Theme")
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundStyle(AppTheme.textPrimary)
                 
                 // 副标题
-                Text("请描述你想要的故事主题，AI会为你创作专属故事")
+                Text("Describe the story you want, and AI will create it for you")
                     .font(.system(size: 14))
                     .foregroundStyle(AppTheme.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                 
-                // 输入框
-                ZStack(alignment: .topLeading) {
-                    if themeText.isEmpty {
-                        Text("例如：小兔子在森林里冒险的故事")
+                // 输入框（强制浅色，不受深色模式影响）
+                VStack(spacing: 8) {
+                    ZStack(alignment: .topLeading) {
+                        if themeText.isEmpty {
+                            Text("e.g., A bunny's adventure in the forest")
+                                .font(.system(size: 14))
+                                .foregroundStyle(AppTheme.textSecondary.opacity(0.6))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 16)
+                        }
+                        
+                        TextEditor(text: $themeText)
                             .font(.system(size: 14))
-                            .foregroundStyle(AppTheme.textSecondary.opacity(0.6))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 16)
+                            .foregroundStyle(AppTheme.textPrimary)
+                            .scrollContentBackground(.hidden)
+                            .frame(height: 120)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 12)
+                            .focused($isTextFieldFocused)
                     }
+                    .background(AppTheme.cardBackground.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
+                    .colorScheme(.light)
                     
-                    TextEditor(text: $themeText)
-                        .font(.system(size: 14))
-                        .foregroundStyle(AppTheme.textPrimary)
-                        .frame(height: 120)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 12)
-                        .background(Color(hex: "F5F5F5"), in: RoundedRectangle(cornerRadius: 6))
-                        .focused($isTextFieldFocused)
+                    // Surprise me 按钮
+                    Button(action: {
+                        print("[ThemeInputModalView] 点击 Surprise me")
+                        let randomCharacter = characters.randomElement() ?? "A little cat"
+                        let randomLocation = locations.randomElement() ?? "in the clouds"
+                        let randomAction = actions.randomElement() ?? "dancing"
+                        themeText = "\(randomCharacter) \(randomLocation) \(randomAction)"
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 14, weight: .medium))
+                            Text("Surprise me")
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        .foregroundStyle(AppTheme.primary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 36)
+                        .background(AppTheme.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
                 }
                 
                 // 按钮行
@@ -63,12 +97,12 @@ struct ThemeInputModalView: View {
                         print("[ThemeInputModalView] 取消")
                         isPresented = false
                     }) {
-                        Text("取消")
+                        Text("Cancel")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(AppTheme.textPrimary)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
-                            .background(Color(hex: "F5F5F5"), in: Capsule())
+                            .background(AppTheme.cardBackground.opacity(0.5), in: Capsule())
                     }
                     .buttonStyle(.plain)
                     
@@ -81,7 +115,7 @@ struct ThemeInputModalView: View {
                         appState.startStoryCreation(theme: themeText.trimmingCharacters(in: .whitespacesAndNewlines))
                         isPresented = false
                     }) {
-                        Text("开始创作")
+                        Text("Create Story")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -95,8 +129,11 @@ struct ThemeInputModalView: View {
             }
             .padding(24)
             .frame(width: 326)
-            .background(Color.white, in: RoundedRectangle(cornerRadius: 24))
+            .background(AppTheme.cardBackground, in: RoundedRectangle(cornerRadius: 24))
             .shadow(color: AppTheme.shadowColor, radius: 20, x: 0, y: 4)
+            .scaleEffect(isPresented ? 1 : 0.9)
+            .opacity(isPresented ? 1 : 0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isPresented)
         }
         .onAppear {
             print("[ThemeInputModalView] onAppear")

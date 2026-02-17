@@ -10,6 +10,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var appOB = AppObservableObject()
     @State private var appState = AppState.shared
     
     var body: some View {
@@ -19,14 +20,28 @@ struct ContentView: View {
                 SplashView()
             case .obStart:
                 OBStartView()
+            case .obTeamIntro:
+                OBTeamIntroPage()
             case .obAge:
                 OBAgePage()
+            case .obAgeMotivation:
+                OBAgeMotivationPage()
             case .obGender:
                 OBGenderPage()
             case .obAvatar:
                 OBAvatarPage()
             case .obName:
                 OBNamePage()
+            case .obNameMotivation:
+                OBNameMotivationPage()
+            case .obRelationship:
+                OBRelationshipPage()
+            case .obRelationshipMotivation:
+                OBRelationshipMotivationPage()
+            case .obPersonalizing:
+                OBPersonalizingPage()
+            case .paywall:
+                PaywallView()
             case .home:
                 HomeView()
             case .storyLoading:
@@ -36,6 +51,8 @@ struct ContentView: View {
             }
         }
         .environment(appState)
+        .environmentObject(appOB)
+        .environmentObject(AudioPlayerManager.shared)
         .animation(.easeInOut(duration: 0.3), value: appState.currentPage)
     }
 }

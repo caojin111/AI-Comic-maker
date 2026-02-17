@@ -29,7 +29,7 @@ struct SplashView: View {
                     .foregroundStyle(AppTheme.primary)
                     .tracking(-1)
                 
-                Text("智能绘本故事")
+                Text("AI Story Book")
                     .font(.system(size: 18))
                     .foregroundStyle(AppTheme.textSecondary)
                 

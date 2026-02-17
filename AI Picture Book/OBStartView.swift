@@ -27,7 +27,7 @@ struct OBStartView: View {
                     .padding(.horizontal)
                 
                 // 文案区域
-                Text("用AI为宝宝创造专属故事")
+                Text("Create personalized stories for your child with AI")
                     .font(.system(size: 20))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.leading)
@@ -35,24 +35,15 @@ struct OBStartView: View {
                     .padding(.horizontal)
                 
                 Spacer()
-                
-                // 继续按钮（设计稿：pill 圆角、primary 色）
-                Button(action: { appState.enterOnboarding() }) {
-                    Text("继续")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 24)
-                        .background(AppTheme.primary, in: Capsule())
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 40)
             }
             .padding(32)
         }
-        .onAppear { print("[OBStartView] onAppear") }
+        .onAppear {
+            print("[OBStartView] onAppear, auto-advance to OB first page in 2s")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                appState.enterOnboarding()
+            }
+        }
     }
 }
 
