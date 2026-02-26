@@ -11,20 +11,21 @@ import SwiftUI
 enum AppPage: Int, CaseIterable {
     case splash = 0
     case obStart = 1
-    case obTeamIntro = 2
-    case obAge = 3
-    case obAgeMotivation = 4
-    case obGender = 5
-    case obAvatar = 6
-    case obName = 7
-    case obNameMotivation = 8
-    case obRelationship = 9
-    case obRelationshipMotivation = 10
-    case obPersonalizing = 11
-    case paywall = 12
-    case home = 13
-    case storyLoading = 14
-    case storyBook = 15
+    case obGetStarted = 2
+    case obTeamIntro = 3
+    case obAge = 4
+    case obAgeMotivation = 5
+    case obGender = 6
+    case obAvatar = 7
+    case obName = 8
+    case obNameMotivation = 9
+    case obRelationship = 10
+    case obRelationshipMotivation = 11
+    case obPersonalizing = 12
+    case paywall = 13
+    case home = 14
+    case storyLoading = 15
+    case storyBook = 16
 }
 
 /// 用户选择年龄段
@@ -77,6 +78,18 @@ enum AvatarOption: String, CaseIterable {
         case .sun, .flower: return "FFB84D"
         }
     }
+    
+    /// 头像对应的 Lottie 动画文件名（不含 .json）
+    var lottieAnimationName: String {
+        switch self {
+        case .smile: return "boy-with-a-relieved-expression-animation_10780301"
+        case .star: return "boy-with-a-relieved-expression-animation_10780302"
+        case .sun: return "boy-with-a-relieved-expression-animation_10780303"
+        case .moon: return "girl-with-a-relieved-expression-animation_10780306"
+        case .cloud: return "girl-with-a-relieved-expression-animation_10780307"
+        case .flower: return "girl-with-a-relieved-expression-animation_10780309"
+        }
+    }
 }
 
 @Observable
@@ -85,6 +98,12 @@ final class AppState {
     
     /// 当前显示的页面
     var currentPage: AppPage = .splash
+    
+    /// OB 翻页方向：true = 下一页（从左滑入），false = 上一页（从右滑入），用于过渡动画
+    var obNavigationForward: Bool = true
+
+    /// 为 true 时表示正在播放进度条 sparkles，播完后会执行 nextOnboardingPage
+    var obPendingSparkles: Bool = false
     
     /// 是否已完成 Onboarding（用于持久化）
     @ObservationIgnored
@@ -132,24 +151,38 @@ final class AppState {
     
     /// 进入 OB 流程（从启动页或 OB 开始）
     func enterOnboarding() {
-        print("[AppState] enterOnboarding")
-        currentPage = .obTeamIntro
+        print("[AppState] enterOnboarding -> obGetStarted")
+        currentPage = .obGetStarted
     }
     
-    /// OB 下一页
+    /// 请求 OB 下一页：先播进度条 sparkles，播完后再调用 nextOnboardingPage（OB 内容页用）
+    func requestOBNextPage() {
+        guard !obPendingSparkles else {
+            print("[AppState] requestOBNextPage 忽略：已在播放 sparkles")
+            return
+        }
+        obPendingSparkles = true
+        print("[AppState] requestOBNextPage, obPendingSparkles = true")
+    }
+
+    /// OB 下一页（sparkles 播完后由 OBFlowContainer 调用，或非 OB 流程直接调用）
     func nextOnboardingPage() {
-        switch currentPage {
-        case .obTeamIntro: currentPage = .obAge
-        case .obAge: currentPage = .obAgeMotivation
-        case .obAgeMotivation: currentPage = .obGender
-        case .obGender: currentPage = .obAvatar
-        case .obAvatar: currentPage = .obName
-        case .obName: currentPage = .obNameMotivation
-        case .obNameMotivation: currentPage = .obRelationship
-        case .obRelationship: currentPage = .obRelationshipMotivation
-        case .obRelationshipMotivation: currentPage = .obPersonalizing
-        case .obPersonalizing: currentPage = .paywall
-        default: break
+        obNavigationForward = true
+        withAnimation(.easeInOut(duration: 0.35)) {
+            switch currentPage {
+            case .obGetStarted: currentPage = .obTeamIntro
+            case .obTeamIntro: currentPage = .obAge
+            case .obAge: currentPage = .obAgeMotivation
+            case .obAgeMotivation: currentPage = .obGender
+            case .obGender: currentPage = .obAvatar
+            case .obAvatar: currentPage = .obName
+            case .obName: currentPage = .obNameMotivation
+            case .obNameMotivation: currentPage = .obRelationship
+            case .obRelationship: currentPage = .obRelationshipMotivation
+            case .obRelationshipMotivation: currentPage = .obPersonalizing
+            case .obPersonalizing: currentPage = .paywall
+            default: break
+            }
         }
         print("[AppState] nextOnboardingPage -> \(currentPage)")
     }
@@ -163,16 +196,20 @@ final class AppState {
 
     /// OB 返回上一页
     func previousOnboardingPage() {
-        switch currentPage {
-        case .obAge: currentPage = .obTeamIntro
-        case .obAgeMotivation: currentPage = .obAge
-        case .obGender: currentPage = .obAgeMotivation
-        case .obAvatar: currentPage = .obGender
-        case .obName: currentPage = .obAvatar
-        case .obNameMotivation: currentPage = .obName
-        case .obRelationship: currentPage = .obNameMotivation
-        case .obRelationshipMotivation: currentPage = .obRelationship
-        default: break
+        obNavigationForward = false
+        withAnimation(.easeInOut(duration: 0.35)) {
+            switch currentPage {
+            case .obTeamIntro: currentPage = .obGetStarted
+            case .obAge: currentPage = .obTeamIntro
+            case .obAgeMotivation: currentPage = .obAge
+            case .obGender: currentPage = .obAgeMotivation
+            case .obAvatar: currentPage = .obGender
+            case .obName: currentPage = .obAvatar
+            case .obNameMotivation: currentPage = .obName
+            case .obRelationship: currentPage = .obNameMotivation
+            case .obRelationshipMotivation: currentPage = .obRelationship
+            default: break
+            }
         }
         print("[AppState] previousOnboardingPage -> \(currentPage)")
     }
@@ -224,8 +261,8 @@ final class AppState {
             currentPage = .home
             print("[AppState] onSplashComplete -> home (already onboarded)")
         } else {
-            currentPage = .obStart
-            print("[AppState] onSplashComplete -> obStart")
+            currentPage = .obGetStarted
+            print("[AppState] onSplashComplete -> obGetStarted")
         }
     }
 }

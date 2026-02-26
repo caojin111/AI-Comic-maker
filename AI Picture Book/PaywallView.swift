@@ -50,20 +50,20 @@ struct PaywallView: View {
                             appState.dismissPaywall()
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 32))
+                                .font(AppTheme.font(size: 32))
                                 .foregroundStyle(AppTheme.textSecondary)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(ClickSoundButtonStyle())
                         .padding(.trailing, 20)
                         .padding(.top, 16)
                     }
 
                     Text("Unlock unlimited stories")
-                        .font(.system(size: 26, weight: .bold))
+                        .font(AppTheme.font(size: 26))
                         .foregroundStyle(AppTheme.textPrimary)
                         .multilineTextAlignment(.center)
                     Text("Choose the plan that works for you")
-                        .font(.system(size: 16))
+                        .font(AppTheme.font(size: 16))
                         .foregroundStyle(AppTheme.textSecondary)
                         .padding(.bottom, 8)
 
@@ -72,11 +72,11 @@ struct PaywallView: View {
                         ForEach(Array(benefits.enumerated()), id: \.offset) { _, item in
                             HStack(spacing: 14) {
                                 Image(systemName: item.icon)
-                                    .font(.system(size: 20))
+                                    .font(AppTheme.font(size: 20))
                                     .foregroundStyle(AppTheme.primary)
                                     .frame(width: 28, alignment: .center)
                                 Text(item.text)
-                                    .font(.system(size: 15, weight: .medium))
+                                    .font(AppTheme.font(size: 15))
                                     .foregroundStyle(AppTheme.textPrimary)
                                 Spacer()
                             }
@@ -94,14 +94,14 @@ struct PaywallView: View {
                             plan: .yearly,
                             title: "Yearly",
                             price: yearlyPrice,
-                            period: "/ year",
+                            period: "1-week free trial",
                             badge: "Save \(yearlySavePercent)%"
                         )
                         planCard(
                             plan: .monthly,
                             title: "Monthly",
                             price: monthlyPrice,
-                            period: "/ month",
+                            period: "1-week free trial",
                             badge: nil
                         )
                     }
@@ -109,7 +109,7 @@ struct PaywallView: View {
 
                     // Billing description below plan selection
                     Text(billingDescription)
-                        .font(.system(size: 13))
+                        .font(AppTheme.font(size: 13))
                         .foregroundStyle(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
@@ -121,13 +121,13 @@ struct PaywallView: View {
                         appState.dismissPaywall()
                     }) {
                         Text("Start your free week!")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(AppTheme.font(size: 18))
                             .foregroundStyle(AppTheme.textOnLight)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
                             .background(AppTheme.primary, in: RoundedRectangle(cornerRadius: 16))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                     .padding(.horizontal, 24)
                     .padding(.top, 8)
 
@@ -136,11 +136,11 @@ struct PaywallView: View {
                         print("[PaywallView] Restore purchases")
                     }) {
                         Text("Restore purchases")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(AppTheme.font(size: 14))
                             .foregroundStyle(AppTheme.textSecondary)
                             .underline()
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                     .padding(.top, 12)
                     .padding(.bottom, 32)
                 }
@@ -158,11 +158,11 @@ struct PaywallView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Text(title)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(AppTheme.font(size: 18))
                             .foregroundStyle(AppTheme.textOnLight)
                         if let badge = badge {
                             Text(badge)
-                                .font(.system(size: 12, weight: .bold))
+                                .font(AppTheme.font(size: 12))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
@@ -170,12 +170,12 @@ struct PaywallView: View {
                         }
                     }
                     Text(period)
-                        .font(.system(size: 13))
+                        .font(AppTheme.font(size: 13))
                         .foregroundStyle(Color.gray)
                 }
                 Spacer()
                 Text(price)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(AppTheme.font(size: 18))
                     .foregroundStyle(AppTheme.primary)
             }
             .padding(20)
@@ -186,7 +186,7 @@ struct PaywallView: View {
                     .stroke(isSelected ? AppTheme.primary : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ClickSoundButtonStyle())
     }
 }
 

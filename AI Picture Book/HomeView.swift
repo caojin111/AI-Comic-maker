@@ -19,7 +19,7 @@ struct HomeView: View {
     
     private var displayName: String {
         let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty ? "My Stories" : name
+        return name.isEmpty ? "Hi!" : "Hi! \(name)"
     }
     
     var body: some View {
@@ -32,42 +32,49 @@ struct HomeView: View {
                 }) {
                     HStack(spacing: 16) {
                         if let avatar = appState.childAvatar {
-                            Image(systemName: avatar.sfSymbolName)
-                                .font(.system(size: 40))
-                                .foregroundStyle(.white)
-                                .frame(width: 56, height: 56)
-                                .background(Color(hex: avatar.color), in: Circle())
-                                .shadow(color: AppTheme.shadowColor, radius: 6, x: 0, y: 2)
+                            ZStack {
+                                Circle()
+                                    .fill(Color(hex: avatar.color))
+                                LottieView(
+                                    animationName: avatar.lottieAnimationName,
+                                    subdirectory: "lottie",
+                                    contentMode: .scaleAspectFit
+                                )
+                                .frame(width: 67, height: 67)
+                            }
+                            .frame(width: 56, height: 56)
+                            .clipShape(Circle())
+                            .shadow(color: AppTheme.shadowColor, radius: 6, x: 0, y: 2)
                         } else {
                             Circle()
                                 .fill(AppTheme.secondary.opacity(0.6))
                                 .frame(width: 56, height: 56)
                                 .overlay(
                                     Image(systemName: "person.fill")
-                                        .font(.system(size: 26))
+                                        .font(AppTheme.font(size: 26))
                                         .foregroundStyle(AppTheme.textPrimary)
                                 )
                         }
                         VStack(alignment: .leading, spacing: 2) {
                             Text(displayName)
-                                .font(.system(size: 20, weight: .bold))
+                                .font(AppTheme.font(size: 20))
                                 .foregroundStyle(AppTheme.textPrimary)
                             Text("Create a new story below")
-                                .font(.system(size: 12))
+                                .font(AppTheme.font(size: 12))
                                 .foregroundStyle(AppTheme.textSecondary)
                         }
                     }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClickSoundButtonStyle())
                 
                 Spacer()
                 Button(action: { showSettings = true }) {
                     Image(systemName: "gearshape.fill")
-                        .font(.system(size: 22))
+                        .font(AppTheme.font(size: 22))
                         .foregroundStyle(AppTheme.textPrimary)
                         .frame(width: 44, height: 44)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClickSoundButtonStyle())
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
@@ -83,13 +90,13 @@ struct HomeView: View {
                 }) {
                     VStack(spacing: 12) {
                         Image(systemName: "plus")
-                            .font(.system(size: 64))
+                            .font(AppTheme.font(size: 64))
                             .foregroundStyle(.white)
                         Text("Start")
-                            .font(.system(size: 24, weight: .semibold))
+                            .font(AppTheme.font(size: 24))
                             .foregroundStyle(.white)
                         Text("Create New Story")
-                            .font(.system(size: 14))
+                            .font(AppTheme.font(size: 14))
                             .foregroundStyle(.white.opacity(0.9))
                     }
                     .frame(maxWidth: .infinity)
@@ -97,13 +104,13 @@ struct HomeView: View {
                     .background(AppTheme.primary, in: RoundedRectangle(cornerRadius: 40))
                     .shadow(color: AppTheme.primary.opacity(0.25), radius: 16, x: 0, y: 4)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClickSoundButtonStyle())
                 
                 // 最近的故事（首页最多展示 3 个）
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         Text("Recent Stories")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(AppTheme.font(size: 20))
                             .foregroundStyle(AppTheme.textPrimary)
                         
                         Spacer()
@@ -115,19 +122,19 @@ struct HomeView: View {
                             }) {
                                 HStack(spacing: 4) {
                                     Text("More")
-                                        .font(.system(size: 14, weight: .medium))
+                                        .font(AppTheme.font(size: 14))
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12, weight: .semibold))
+                                        .font(AppTheme.font(size: 12))
                                 }
                                 .foregroundStyle(AppTheme.primary)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(ClickSoundButtonStyle())
                         }
                     }
                     
                     if recentStories.isEmpty {
                         Text("No stories yet. Tap above to create one")
-                            .font(.system(size: 14))
+                            .font(AppTheme.font(size: 14))
                             .foregroundStyle(AppTheme.textSecondary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 40)

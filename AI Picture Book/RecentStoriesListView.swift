@@ -25,12 +25,12 @@ struct RecentStoriesListView: View {
                 if currentStories.isEmpty {
                     VStack(spacing: 16) {
                         Text("📖")
-                            .font(.system(size: 64))
+                            .font(AppTheme.font(size: 64))
                         Text("No Stories Yet")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(AppTheme.font(size: 18))
                             .foregroundStyle(AppTheme.textPrimary)
                         Text("Go to home to create a new story")
-                            .font(.system(size: 14))
+                            .font(AppTheme.font(size: 14))
                             .foregroundStyle(AppTheme.textSecondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -76,25 +76,25 @@ struct RecentStoriesListView: View {
                                     }
                                 }) {
                                     Text(selectedStoryIds.count == stories.count ? "Deselect All" : "Select All")
-                                        .font(.system(size: 16, weight: .medium))
+                                        .font(AppTheme.font(size: 16))
                                         .foregroundStyle(AppTheme.primary)
                                         .frame(maxWidth: .infinity)
                                         .frame(height: 44)
                                         .background(AppTheme.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(ClickSoundButtonStyle())
                                 
                                 Button(action: {
                                     deleteSelectedStories()
                                 }) {
                                     Text("Delete (\(selectedStoryIds.count))")
-                                        .font(.system(size: 16, weight: .semibold))
+                                        .font(AppTheme.font(size: 16))
                                         .foregroundStyle(.white)
                                         .frame(maxWidth: .infinity)
                                         .frame(height: 44)
                                         .background(selectedStoryIds.isEmpty ? Color.gray : Color.red, in: RoundedRectangle(cornerRadius: 12))
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(ClickSoundButtonStyle())
                                 .disabled(selectedStoryIds.isEmpty)
                             }
                             .padding(.horizontal, 20)
@@ -115,7 +115,7 @@ struct RecentStoriesListView: View {
                             selectedStoryIds.removeAll()
                         }) {
                             Text("Cancel")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(AppTheme.font(size: 16))
                                 .foregroundStyle(AppTheme.primary)
                         }
                     }
@@ -128,14 +128,14 @@ struct RecentStoriesListView: View {
                                 isSelectMode = true
                             }) {
                                 Text("Select")
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(AppTheme.font(size: 16))
                                     .foregroundStyle(AppTheme.primary)
                             }
                         }
                         
                         Button(action: { dismiss() }) {
                             Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 28))
+                                .font(AppTheme.font(size: 28))
                                 .foregroundStyle(AppTheme.textSecondary)
                         }
                     }
@@ -189,7 +189,7 @@ struct StoryRowButton: View {
                 // 选择模式：显示复选框
                 if isSelectMode {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 24))
+                        .font(AppTheme.font(size: 24))
                         .foregroundStyle(isSelected ? AppTheme.primary : Color.gray.opacity(0.5))
                         .frame(width: 28)
                 }
@@ -211,29 +211,29 @@ struct StoryRowButton: View {
                         .frame(width: 60, height: 60)
                         .overlay(
                             Image(systemName: "book.fill")
-                                .font(.system(size: 24))
+                                .font(AppTheme.font(size: 24))
                                 .foregroundStyle(AppTheme.textSecondary)
                         )
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(story.theme)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(AppTheme.font(size: 16))
                         .foregroundStyle(AppTheme.textPrimary)
                         .lineLimit(1)
                     Text(story.previewText)
-                        .font(.system(size: 13))
+                        .font(AppTheme.font(size: 13))
                         .foregroundStyle(AppTheme.textSecondary)
                         .lineLimit(2)
                     Text(story.formattedDate)
-                        .font(.system(size: 11))
+                        .font(AppTheme.font(size: 11))
                         .foregroundStyle(AppTheme.textSecondary.opacity(0.8))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 if !isSelectMode {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(AppTheme.font(size: 14))
                         .foregroundStyle(AppTheme.textSecondary)
                 }
             }
@@ -245,7 +245,7 @@ struct StoryRowButton: View {
             )
             .shadow(color: AppTheme.shadowColor, radius: 8, x: 0, y: 2)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ClickSoundButtonStyle())
         .highPriorityGesture(
             DragGesture(minimumDistance: 10)
                 .onChanged { _ in

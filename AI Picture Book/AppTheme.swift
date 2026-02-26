@@ -8,6 +8,21 @@
 import SwiftUI
 
 enum AppTheme {
+    /// 应用统一字体（Baloo2-Medium.ttf），需在 Target → Info → Fonts provided by application 中注册
+    static let appFontName = "Baloo2-Medium"
+    /// 标题/问题用粗体（Baloo2-Bold.ttf）
+    static let appFontNameBold = "Baloo2-Bold"
+
+    /// 使用应用字体的 Font，指定字号
+    static func font(size: CGFloat) -> Font {
+        .custom(appFontName, size: size)
+    }
+
+    /// 标题/问题类文本用粗体
+    static func fontBold(size: CGFloat) -> Font {
+        .custom(appFontNameBold, size: size)
+    }
+    
     /// 行动唤起色 / 主题色（橙色 #FFB979）
     static let primary = Color(hex: "FFB979")
     
@@ -22,6 +37,15 @@ enum AppTheme {
     
     /// 浅色背景上的文字（深灰，用于 OB 白底卡片等）
     static let textOnLight = Color(hex: "333333")
+    
+    /// OB 页面正文/描述文本色（#635C82）
+    static let obBodyText = Color(hex: "635C82")
+    
+    /// OB 重点词字体（Rowdies-Bold.ttf）与颜色（#11473C）
+    static let obHighlightColor = Color(hex: "11473C")
+    static func fontRowdiesBold(size: CGFloat) -> Font {
+        .custom("Rowdies-Bold", size: size)
+    }
     
     /// 次要填充色（进度条轨道等，使用蓝色 #2CD0FE）
     static let secondary = Color(hex: "2CD0FE")

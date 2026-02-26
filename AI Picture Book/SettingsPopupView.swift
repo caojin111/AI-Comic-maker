@@ -32,15 +32,15 @@ struct SettingsPopupView: View {
             // Header
             HStack {
                 Text("Settings")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(AppTheme.font(size: 20))
                     .foregroundStyle(AppTheme.textOnLight)
                 Spacer()
                 Button(action: { isPresented = false }) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 28))
+                        .font(AppTheme.font(size: 28))
                         .foregroundStyle(Color.gray.opacity(0.5))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClickSoundButtonStyle())
             }
             .padding(.horizontal, 24)
             .padding(.top, 20)
@@ -52,23 +52,23 @@ struct SettingsPopupView: View {
                     Button(action: { selectedItem = item }) {
                         HStack(spacing: 16) {
                             Image(systemName: icon(for: item))
-                                .font(.system(size: 20))
+                                .font(AppTheme.font(size: 20))
                                 .foregroundStyle(iconColor(for: item))
                                 .frame(width: 44, height: 44)
                                 .background(iconColor(for: item).opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
                             Text(item.rawValue)
-                                .font(.system(size: 17, weight: .medium))
+                                .font(AppTheme.font(size: 17))
                                 .foregroundStyle(AppTheme.textOnLight)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(AppTheme.font(size: 14))
                                 .foregroundStyle(Color.gray.opacity(0.6))
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 14))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                 }
             }
             .padding(.horizontal, 24)

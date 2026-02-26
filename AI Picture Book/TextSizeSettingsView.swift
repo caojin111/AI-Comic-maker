@@ -33,7 +33,7 @@ struct TextSizeSettingsView: View {
             // 滑动条容器
             VStack(spacing: 24) {
                 Text("Text Size")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(AppTheme.font(size: 20))
                     .foregroundStyle(.white)
                 
                 // 滑动条
@@ -71,7 +71,7 @@ struct TextSizeSettingsView: View {
                 
                 // 预览文本
                 Text("Preview text size")
-                    .font(.system(size: fontSize, weight: .medium))
+                    .font(AppTheme.font(size: fontSize))
                     .foregroundStyle(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)

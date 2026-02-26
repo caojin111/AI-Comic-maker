@@ -2,12 +2,12 @@
 //  AudioCache.swift
 //  AI Picture Book
 //
-//  语音缓存：磁盘持久化，按 pageId 存储
+//  语音存储：按 pageId 持久化。使用 Application Support 以在系统清理缓存、低存储时保留，仅随故事删除而删除。
 //
 
 import Foundation
 
-/// 语音缓存服务（磁盘持久化）
+/// 语音存储服务（与故事生命周期绑定，存在 Application Support 以提升持久性）
 final class AudioCache {
     static let shared = AudioCache()
     
@@ -15,9 +15,29 @@ final class AudioCache {
     private let diskCacheDirectory: URL
     
     private init() {
-        let cachesURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        diskCacheDirectory = cachesURL.appendingPathComponent("AudioCache", isDirectory: true)
+        // 使用 Application Support，避免被系统当作“可清理缓存”在低存储时删除；仅升级客户端时目录会保留
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        diskCacheDirectory = appSupport.appendingPathComponent("AudioCache", isDirectory: true)
         try? fileManager.createDirectory(at: diskCacheDirectory, withIntermediateDirectories: true)
+        migrateFromCachesIfNeeded()
+    }
+    
+    /// 一次性迁移：将旧版存在 Caches/AudioCache 的语音迁移到 Application Support，升级后仍保留原有语音
+    private func migrateFromCachesIfNeeded() {
+        let cachesURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let oldDir = cachesURL.appendingPathComponent("AudioCache", isDirectory: true)
+        guard fileManager.fileExists(atPath: oldDir.path) else { return }
+        guard let entries = try? fileManager.contentsOfDirectory(at: oldDir, includingPropertiesForKeys: nil) else { return }
+        var migrated = 0
+        for src in entries where src.pathExtension.lowercased() == "wav" || src.pathExtension.lowercased() == "mp3" {
+            let dst = diskCacheDirectory.appendingPathComponent(src.lastPathComponent)
+            if !fileManager.fileExists(atPath: dst.path), (try? fileManager.copyItem(at: src, to: dst)) != nil {
+                migrated += 1
+            }
+        }
+        if migrated > 0 {
+            print("[AudioCache] 已从 Caches 迁移 \(migrated) 个语音文件到 Application Support")
+        }
     }
     
     /// 缓存 key

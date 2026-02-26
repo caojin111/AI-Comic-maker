@@ -24,15 +24,15 @@ struct EditProfilePopupView: View {
             // Header
             HStack {
                 Text("Edit Profile")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(AppTheme.font(size: 20))
                     .foregroundStyle(AppTheme.textOnLight)
                 Spacer()
                 Button(action: { isPresented = false }) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 24))
+                        .font(AppTheme.font(size: 24))
                         .foregroundStyle(Color.gray.opacity(0.6))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClickSoundButtonStyle())
             }
             .padding(.horizontal, 24)
             .padding(.top, 20)
@@ -43,10 +43,10 @@ struct EditProfilePopupView: View {
                 // Name input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Name")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(AppTheme.font(size: 14))
                         .foregroundStyle(Color.gray)
                     TextField("Enter name", text: $nameText)
-                        .font(.system(size: 16))
+                        .font(AppTheme.font(size: 16))
                         .foregroundStyle(AppTheme.textOnLight)
                         .padding(.horizontal, 16)
                         .frame(height: 48)
@@ -57,23 +57,30 @@ struct EditProfilePopupView: View {
                 // Avatar selection
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Avatar")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(AppTheme.font(size: 14))
                         .foregroundStyle(Color.gray)
                     
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(AvatarOption.allCases, id: \.self) { avatar in
                             Button(action: { selectedAvatar = avatar }) {
-                                Image(systemName: avatar.sfSymbolName)
-                                    .font(.system(size: 32))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 70, height: 70)
-                                    .background(Color(hex: avatar.color), in: Circle())
-                                    .overlay(
-                                        Circle()
-                                            .stroke(AppTheme.primary, lineWidth: selectedAvatar == avatar ? 4 : 0)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(hex: avatar.color))
+                                    LottieView(
+                                        animationName: avatar.lottieAnimationName,
+                                        subdirectory: "lottie",
+                                        contentMode: .scaleAspectFit
                                     )
+                                    .frame(width: 84, height: 84)
+                                }
+                                .frame(width: 70, height: 70)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(AppTheme.primary, lineWidth: selectedAvatar == avatar ? 4 : 0)
+                                )
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(ClickSoundButtonStyle())
                         }
                     }
                 }
@@ -90,13 +97,13 @@ struct EditProfilePopupView: View {
                     isPresented = false
                 }) {
                     Text("Save")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(AppTheme.font(size: 17))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                         .background(AppTheme.primary, in: RoundedRectangle(cornerRadius: 16))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClickSoundButtonStyle())
                 .padding(.top, 8)
             }
             .padding(.horizontal, 24)

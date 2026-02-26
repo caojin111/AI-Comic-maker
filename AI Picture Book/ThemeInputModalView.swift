@@ -13,11 +13,6 @@ struct ThemeInputModalView: View {
     @State private var themeText: String = ""
     @FocusState private var isTextFieldFocused: Bool
     
-    // 随机生成描述的数据（英文）
-    private let characters = ["A little cat", "A puppy", "A bunny", "A bird", "A bear", "A little girl", "A little boy", "An elephant", "A deer", "A fox", "A squirrel", "A penguin"]
-    private let locations = ["in the clouds", "in the forest", "by the sea", "in the garden", "in a castle", "in space", "under the sea", "on a rainbow", "on the moon", "among the stars", "in a magic forest", "in a candy house"]
-    private let actions = ["dancing", "singing", "exploring", "flying", "swimming", "reading", "drawing", "playing games", "searching for treasure", "helping friends", "learning magic", "making cakes"]
-    
     var body: some View {
         ZStack {
             // 遮罩层（添加淡入动画，让出现更柔和）
@@ -35,12 +30,12 @@ struct ThemeInputModalView: View {
             VStack(spacing: 24) {
                 // 标题
                 Text("Enter Story Theme")
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(AppTheme.font(size: 24))
                     .foregroundStyle(AppTheme.textPrimary)
                 
                 // 副标题
                 Text("Describe the story you want, and AI will create it for you")
-                    .font(.system(size: 14))
+                    .font(AppTheme.font(size: 14))
                     .foregroundStyle(AppTheme.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
@@ -50,14 +45,14 @@ struct ThemeInputModalView: View {
                     ZStack(alignment: .topLeading) {
                         if themeText.isEmpty {
                             Text("e.g., A bunny's adventure in the forest")
-                                .font(.system(size: 14))
+                                .font(AppTheme.font(size: 14))
                                 .foregroundStyle(AppTheme.textSecondary.opacity(0.6))
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 16)
                         }
                         
                         TextEditor(text: $themeText)
-                            .font(.system(size: 14))
+                            .font(AppTheme.font(size: 14))
                             .foregroundStyle(AppTheme.textPrimary)
                             .scrollContentBackground(.hidden)
                             .frame(height: 120)
@@ -68,26 +63,23 @@ struct ThemeInputModalView: View {
                     .background(AppTheme.cardBackground.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
                     .colorScheme(.light)
                     
-                    // Surprise me 按钮
+                    // Surprise me 按钮（从本地 JSON 词库生成，支持双主角与 lesson 概率）
                     Button(action: {
                         print("[ThemeInputModalView] 点击 Surprise me")
-                        let randomCharacter = characters.randomElement() ?? "A little cat"
-                        let randomLocation = locations.randomElement() ?? "in the clouds"
-                        let randomAction = actions.randomElement() ?? "dancing"
-                        themeText = "\(randomCharacter) \(randomLocation) \(randomAction)"
+                        themeText = SurpriseMeWordBankLoader.generateTheme()
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "sparkles")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(AppTheme.font(size: 14))
                             Text("Surprise me")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(AppTheme.font(size: 14))
                         }
                         .foregroundStyle(AppTheme.primary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 36)
                         .background(AppTheme.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                 }
                 
                 // 按钮行
@@ -98,13 +90,13 @@ struct ThemeInputModalView: View {
                         isPresented = false
                     }) {
                         Text("Cancel")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(AppTheme.font(size: 16))
                             .foregroundStyle(AppTheme.textPrimary)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .background(AppTheme.cardBackground.opacity(0.5), in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                     
                     // 确认按钮
                     Button(action: {
@@ -116,13 +108,13 @@ struct ThemeInputModalView: View {
                         isPresented = false
                     }) {
                         Text("Create Story")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(AppTheme.font(size: 16))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .background(AppTheme.primary, in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                     .disabled(themeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .opacity(themeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.6 : 1.0)
                 }

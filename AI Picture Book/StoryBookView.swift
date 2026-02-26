@@ -48,19 +48,19 @@ struct StoryBookView: View {
                     if appOB.status == .loading {
                         VStack(spacing: 16) {
                             ProgressView().scaleEffect(1.5)
-                            Text("Creating your story book...").font(.system(size: 20, weight: .semibold)).foregroundStyle(AppTheme.textPrimary)
-                            Text("AI is creating a multi-page story for you. Please wait...").font(.system(size: 14)).foregroundStyle(AppTheme.textSecondary)
+                            Text("Creating your story book...").font(AppTheme.font(size: 20)).foregroundStyle(AppTheme.textPrimary)
+                            Text("AI is creating a multi-page story for you. Please wait...").font(AppTheme.font(size: 14)).foregroundStyle(AppTheme.textSecondary)
                         }
                     } else if appOB.status == .failed {
                         VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 64)).foregroundStyle(Color.orange)
-                            Text("Generation Failed").font(.system(size: 20, weight: .semibold)).foregroundStyle(AppTheme.textPrimary)
-                            Text("Please check your network connection or API configuration").font(.system(size: 14)).foregroundStyle(AppTheme.textSecondary)
+                            Image(systemName: "exclamationmark.triangle.fill").font(AppTheme.font(size: 64)).foregroundStyle(Color.orange)
+                            Text("Generation Failed").font(AppTheme.font(size: 20)).foregroundStyle(AppTheme.textPrimary)
+                            Text("Please check your network connection or API configuration").font(AppTheme.font(size: 14)).foregroundStyle(AppTheme.textSecondary)
                         }
                     } else {
                         VStack(spacing: 16) {
-                            Text("📖").font(.system(size: 64))
-                            Text("Waiting for story").font(.system(size: 20, weight: .semibold)).foregroundStyle(AppTheme.textPrimary)
+                            Text("📖").font(AppTheme.font(size: 64))
+                            Text("Waiting for story").font(AppTheme.font(size: 20)).foregroundStyle(AppTheme.textPrimary)
                         }
                     }
                     Spacer()
@@ -90,25 +90,25 @@ struct StoryBookView: View {
                 HStack {
                     Button(action: { appState.backToHome() }) {
                         Image(systemName: "house.fill")
-                            .font(.system(size: 24))
+                            .font(AppTheme.font(size: 24))
                             .foregroundStyle(AppTheme.textPrimary)
                             .frame(width: 44, height: 44)
                             .background(Color.white, in: Circle())
                             .shadow(color: AppTheme.shadowColor, radius: 8, x: 0, y: 2)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                     Spacer()
                     Button(action: {
                         showSettings = true
                     }) {
                         Image(systemName: "gearshape.fill")
-                            .font(.system(size: 24))
+                            .font(AppTheme.font(size: 24))
                             .foregroundStyle(AppTheme.textPrimary)
                             .frame(width: 44, height: 44)
                             .background(Color.white, in: Circle())
                             .shadow(color: AppTheme.shadowColor, radius: 8, x: 0, y: 2)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClickSoundButtonStyle())
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
@@ -199,8 +199,8 @@ struct StoryPageView: View {
                     Color.black.opacity(0.5)
                         .overlay(
                             VStack(spacing: 12) {
-                                Image(systemName: "photo").font(.system(size: 64)).foregroundStyle(.white.opacity(0.7))
-                                Text("Generating image...").font(.system(size: 14)).foregroundStyle(.white.opacity(0.7))
+                                Image(systemName: "photo").font(AppTheme.font(size: 64)).foregroundStyle(.white.opacity(0.7))
+                                Text("Generating image...").font(AppTheme.font(size: 14)).foregroundStyle(.white.opacity(0.7))
                             }
                         )
                         .frame(width: size.width, height: size.height)
@@ -224,12 +224,12 @@ struct StoryPageView: View {
                                 onPageChange?(currentIndex - 1)
                             }) {
                                 Image(systemName: "chevron.left")
-                                    .font(.system(size: 24, weight: .semibold))
+                                    .font(AppTheme.font(size: 24))
                                     .foregroundColor(.white)
                                     .frame(width: 44, height: 44)
                                     .background(Color.white.opacity(0.2), in: Circle())
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(ClickSoundButtonStyle())
                         } else {
                             // 占位，保持布局
                             Spacer()
@@ -239,7 +239,7 @@ struct StoryPageView: View {
                         // 文本内容 + 喇叭按钮
                         HStack(alignment: .bottom, spacing: 8) {
                             Text(page.text)
-                                .font(.system(size: fontSize, weight: .medium))
+                                .font(AppTheme.font(size: fontSize))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(8)
@@ -255,12 +255,12 @@ struct StoryPageView: View {
                                     }
                                 }) {
                                     Image(systemName: audioPlayer.currentPageId == page.id && audioPlayer.isPlaying ? "speaker.wave.2.fill" : "speaker.wave.2")
-                                        .font(.system(size: 22))
+                                        .font(AppTheme.font(size: 22))
                                         .foregroundColor(.white)
                                         .frame(width: 44, height: 44)
                                         .background(Color.white.opacity(0.2), in: Circle())
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(ClickSoundButtonStyle())
                             }
                         }
                         .background(
@@ -275,12 +275,12 @@ struct StoryPageView: View {
                                 onPageChange?(currentIndex + 1)
                             }) {
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 24, weight: .semibold))
+                                    .font(AppTheme.font(size: 24))
                                     .foregroundColor(.white)
                                     .frame(width: 44, height: 44)
                                     .background(Color.white.opacity(0.2), in: Circle())
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(ClickSoundButtonStyle())
                         } else {
                             // 占位，保持布局
                             Spacer()

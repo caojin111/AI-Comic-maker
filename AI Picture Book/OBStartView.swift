@@ -12,7 +12,7 @@ struct OBStartView: View {
     
     var body: some View {
         ZStack {
-            AppTheme.obStartBackground
+            Color(hex: "FFFFFF")
                 .ignoresSafeArea()
             
             VStack(spacing: 24) {
@@ -28,8 +28,8 @@ struct OBStartView: View {
                 
                 // 文案区域
                 Text("Create personalized stories for your child with AI")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.white)
+                    .font(AppTheme.font(size: 20))
+                    .foregroundStyle(AppTheme.textOnLight)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)

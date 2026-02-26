@@ -27,10 +27,11 @@ struct SettingsView: View {
                                 .foregroundStyle(AppTheme.textOnLight)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(AppTheme.font(size: 14))
                                 .foregroundStyle(AppTheme.textSecondary)
                         }
                     }
+                    .buttonStyle(ClickSoundButtonStyle())
                 }
             }
             .listStyle(.insetGrouped)
@@ -42,6 +43,7 @@ struct SettingsView: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .buttonStyle(ClickSoundButtonStyle())
                     .foregroundStyle(AppTheme.primary)
                 }
             }
@@ -61,7 +63,7 @@ struct SettingsDetailView: View {
         NavigationStack {
             ScrollView {
                 Text(detailContent)
-                    .font(.system(size: 15))
+                    .font(AppTheme.font(size: 15))
                     .foregroundStyle(AppTheme.textOnLight)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(24)
@@ -74,6 +76,7 @@ struct SettingsDetailView: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .buttonStyle(ClickSoundButtonStyle())
                     .foregroundStyle(AppTheme.primary)
                 }
             }

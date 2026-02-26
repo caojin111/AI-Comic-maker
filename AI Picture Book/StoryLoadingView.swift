@@ -33,13 +33,13 @@ struct StoryLoadingView: View {
                 // 失败状态：友好提示 + 重试按钮
                 VStack(spacing: 24) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 56))
+                        .font(AppTheme.font(size: 56))
                         .foregroundStyle(AppTheme.accentOrange)
                     Text("Server Busy")
-                        .font(.system(size: 22, weight: .semibold))
+                        .font(AppTheme.font(size: 22))
                         .foregroundStyle(AppTheme.textPrimary)
                     Text("Please try again later")
-                        .font(.system(size: 16))
+                        .font(AppTheme.font(size: 16))
                         .foregroundStyle(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)
                         .frame(width: 280)
@@ -49,13 +49,13 @@ struct StoryLoadingView: View {
                             appState.backToHome()
                         }) {
                             Text("Home")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(AppTheme.font(size: 16))
                                 .foregroundStyle(AppTheme.textPrimary)
                                 .frame(width: 160)
                                 .padding(.vertical, 14)
                                 .background(AppTheme.cardBackground.opacity(0.8), in: Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(ClickSoundButtonStyle())
                         Button(action: {
                             print("[StoryLoadingView] 用户点击重试")
                             phase = .generating
@@ -64,13 +64,13 @@ struct StoryLoadingView: View {
                             startLoadingAnimation()
                         }) {
                             Text("Retry")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(AppTheme.font(size: 16))
                                 .foregroundStyle(.white)
                                 .frame(width: 160)
                                 .padding(.vertical, 14)
                                 .background(AppTheme.primary, in: Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(ClickSoundButtonStyle())
                     }
                     .padding(.top, 8)
                 }
@@ -90,11 +90,11 @@ struct StoryLoadingView: View {
                     }
                     
                     Text(phaseTitle)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(AppTheme.font(size: 20))
                         .foregroundStyle(AppTheme.textPrimary)
                     
                     Text(phaseSubtitle)
-                        .font(.system(size: 14))
+                        .font(AppTheme.font(size: 14))
                         .foregroundStyle(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)
                         .frame(width: 326)
