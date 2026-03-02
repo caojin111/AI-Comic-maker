@@ -65,7 +65,14 @@ class AppObservableObject: ObservableObject {
         request.setValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 120.0
         
-        let body: [String: String] = ["theme": theme]
+        // 生成随机种子，用于保持绘本风格一致性
+        let storySeed = Int.random(in: 1...999999)
+        print("[AppObservableObject] 生成随机种子：\(storySeed)")
+        
+        let body: [String: Any] = [
+            "theme": theme,
+            "seed": storySeed
+        ]
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)

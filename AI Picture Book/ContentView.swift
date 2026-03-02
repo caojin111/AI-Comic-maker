@@ -19,6 +19,7 @@ private struct OBPageSlideContainer<Content: View>: View {
 
     var body: some View {
         content()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .offset(x: offset ?? (forward ? screenWidth : -screenWidth))
             .onAppear {
                 guard offset == nil else { return }
@@ -41,6 +42,40 @@ struct ContentView: View {
         switch page {
         case .obGetStarted, .obTeamIntro, .obAge, .obAgeMotivation, .obGender, .obAvatar, .obName, .obNameMotivation, .obRelationship, .obRelationshipMotivation:
             return "obFlow"
+        case .obPersonalizing:
+            return "obPersonalizing"
+        case .obAllSetUp:
+            return "obAllSetUp"
+        case .obChartMotivation:
+            return "obChartMotivation"
+        default:
+            return "\(page)"
+        }
+    }
+
+    var body: some View {
+        ContentRootView()
+            .environment(appState)
+            .environmentObject(appOB)
+            .environmentObject(AudioPlayerManager.shared)
+    }
+}
+
+/// 根据 currentPage 选中的根视图（用 @Environment(AppState.self) 确保随 currentPage 更新）
+private struct ContentRootView: View {
+    @Environment(AppState.self) private var appState
+
+    private static var slideWidth: CGFloat { UIScreen.main.bounds.width }
+    private static func rootViewId(for page: AppPage) -> String {
+        switch page {
+        case .obGetStarted, .obTeamIntro, .obAge, .obAgeMotivation, .obGender, .obAvatar, .obName, .obNameMotivation, .obRelationship, .obRelationshipMotivation:
+            return "obFlow"
+        case .obPersonalizing:
+            return "obPersonalizing"
+        case .obAllSetUp:
+            return "obAllSetUp"
+        case .obChartMotivation:
+            return "obChartMotivation"
         default:
             return "\(page)"
         }
@@ -57,6 +92,10 @@ struct ContentView: View {
                 OBFlowContainerView()
             case .obPersonalizing:
                 OBPageSlideContainer(screenWidth: Self.slideWidth, forward: appState.obNavigationForward) { OBPersonalizingPage() }
+            case .obAllSetUp:
+                OBPageSlideContainer(screenWidth: Self.slideWidth, forward: appState.obNavigationForward) { OBAllSetUpPage() }
+            case .obChartMotivation:
+                OBPageSlideContainer(screenWidth: Self.slideWidth, forward: appState.obNavigationForward) { OBChartMotivationPage() }
             case .paywall:
                 PaywallView()
             case .home:
@@ -70,9 +109,6 @@ struct ContentView: View {
         .background(Color(hex: "FFFFFF"))
         .id(Self.rootViewId(for: appState.currentPage))
         .animation(.easeInOut(duration: 0.35), value: appState.currentPage)
-        .environment(appState)
-        .environmentObject(appOB)
-        .environmentObject(AudioPlayerManager.shared)
     }
 }
 

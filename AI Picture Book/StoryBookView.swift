@@ -11,8 +11,10 @@ import UIKit
 struct StoryBookView: View {
     @Environment(AppState.self) private var appState
     @EnvironmentObject var appOB: AppObservableObject
+    @ObservedObject private var musicManager = BackgroundMusicManager.shared
     @State private var currentPageIndex: Int = 0
     @State private var showSettings = false
+    @State private var isUIVisible = true // 控制UI显示/隐藏
     @AppStorage("storyTextSize") private var textSize: Double = 0.0 // 0.0 = 最小，1.0 = 最大
     
     // 用于传递给 PageViewController 的环境对象
@@ -78,10 +80,16 @@ struct StoryBookView: View {
                         shouldRequestImageGeneration: appState.viewingSavedStory == nil,
                         appOB: appOBForPages,
                         audioPlayer: AudioPlayerManager.shared,
-                        fontSize: fontSize
+                        fontSize: fontSize,
+                        isUIVisible: $isUIVisible
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea(edges: .all)
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isUIVisible.toggle()
+                        }
+                    }
                 }
             }
             
@@ -90,29 +98,60 @@ struct StoryBookView: View {
                 HStack {
                     Button(action: { appState.backToHome() }) {
                         Image(systemName: "house.fill")
-                            .font(AppTheme.font(size: 24))
-                            .foregroundStyle(AppTheme.textPrimary)
+                            .font(AppTheme.font(size: 20))
+                            .foregroundStyle(Color(hex: "5D4E37"))
                             .frame(width: 44, height: 44)
-                            .background(Color.white, in: Circle())
-                            .shadow(color: AppTheme.shadowColor, radius: 8, x: 0, y: 2)
+                            .background(
+                                Circle()
+                                    .fill(Color.white)
+                                    .shadow(color: Color(hex: "D4A574").opacity(0.3), radius: 8, x: 0, y: 3)
+                            )
                     }
                     .buttonStyle(ClickSoundButtonStyle())
                     Spacer()
-                    Button(action: {
-                        showSettings = true
-                    }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(AppTheme.font(size: 24))
-                            .foregroundStyle(AppTheme.textPrimary)
-                            .frame(width: 44, height: 44)
-                            .background(Color.white, in: Circle())
-                            .shadow(color: AppTheme.shadowColor, radius: 8, x: 0, y: 2)
+                    HStack(spacing: 12) {
+                        // 音乐开关按钮
+                        Button(action: {
+                            if musicManager.isPlaying {
+                                musicManager.pause()
+                            } else {
+                                musicManager.resume()
+                            }
+                        }) {
+                            Image(systemName: musicManager.isPlaying ? "music.note" : "music.note.slash")
+                                .font(AppTheme.font(size: 20))
+                                .foregroundStyle(musicManager.isPlaying ? Color(hex: "5D4E37") : Color.gray)
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    Circle()
+                                        .fill(musicManager.isPlaying ? Color.white : Color.white.opacity(0.6))
+                                        .shadow(color: Color(hex: "D4A574").opacity(musicManager.isPlaying ? 0.3 : 0.15), radius: 8, x: 0, y: 3)
+                                )
+                        }
+                        .buttonStyle(ClickSoundButtonStyle())
+                        
+                        // 字体大小按钮
+                        Button(action: {
+                            showSettings = true
+                        }) {
+                            Image(systemName: "textformat.size")
+                                .font(AppTheme.font(size: 20))
+                                .foregroundStyle(Color(hex: "5D4E37"))
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    Circle()
+                                        .fill(Color.white)
+                                        .shadow(color: Color(hex: "D4A574").opacity(0.3), radius: 8, x: 0, y: 3)
+                                )
+                        }
+                        .buttonStyle(ClickSoundButtonStyle())
                     }
-                    .buttonStyle(ClickSoundButtonStyle())
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
                 .padding(.bottom, 8)
+                .opacity(isUIVisible ? 1 : 0)
+                .animation(.easeInOut(duration: 0.3), value: isUIVisible)
                 Spacer()
             }
         }
@@ -160,6 +199,8 @@ struct StoryPageView: View {
     var onPageChange: ((Int) -> Void)? = nil
     /// 字体大小
     var fontSize: CGFloat = 20
+    /// UI显示状态
+    @Binding var isUIVisible: Bool
     @EnvironmentObject private var appOB: AppObservableObject
     @EnvironmentObject private var audioPlayer: AudioPlayerManager
     
@@ -214,81 +255,120 @@ struct StoryPageView: View {
                 )
                 .frame(width: size.width, height: size.height)
                 
-                // 3. 文本层：置于底部，带左右箭头
+                // 3. 文本层和语音按钮：置于底部
                 VStack {
                     Spacer()
-                    HStack(spacing: 12) {
-                        // 左箭头（第一页不显示）
-                        if currentIndex > 0 {
-                            Button(action: {
-                                onPageChange?(currentIndex - 1)
-                            }) {
-                                Image(systemName: "chevron.left")
-                                    .font(AppTheme.font(size: 24))
-                                    .foregroundColor(.white)
-                                    .frame(width: 44, height: 44)
-                                    .background(Color.white.opacity(0.2), in: Circle())
-                            }
-                            .buttonStyle(ClickSoundButtonStyle())
-                        } else {
-                            // 占位，保持布局
-                            Spacer()
-                                .frame(width: 44, height: 44)
-                        }
-                        
-                        // 文本内容 + 喇叭按钮
-                        HStack(alignment: .bottom, spacing: 8) {
-                            Text(page.text)
-                                .font(AppTheme.font(size: fontSize))
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(8)
-                                .padding(30)
-                                .frame(maxWidth: .infinity)
-                            // 喇叭按钮：点击播放语音
-                            if AudioCache.shared.hasCache(for: page.id) {
+                    ZStack(alignment: .bottomTrailing) {
+                        // 文本框和左右箭头
+                        HStack(spacing: 12) {
+                            // 左箭头（第一页不显示）
+                            if currentIndex > 0 {
                                 Button(action: {
-                                    if audioPlayer.currentPageId == page.id && audioPlayer.isPlaying {
-                                        audioPlayer.stop()
-                                    } else {
-                                        audioPlayer.play(pageId: page.id)
-                                    }
+                                    onPageChange?(currentIndex - 1)
                                 }) {
-                                    Image(systemName: audioPlayer.currentPageId == page.id && audioPlayer.isPlaying ? "speaker.wave.2.fill" : "speaker.wave.2")
-                                        .font(AppTheme.font(size: 22))
-                                        .foregroundColor(.white)
+                                    Image(systemName: "chevron.left")
+                                        .font(AppTheme.font(size: 20))
+                                        .foregroundColor(Color(hex: "5D4E37"))
                                         .frame(width: 44, height: 44)
-                                        .background(Color.white.opacity(0.2), in: Circle())
+                                        .background(
+                                            Circle()
+                                                .fill(Color.white)
+                                                .shadow(color: Color(hex: "D4A574").opacity(0.3), radius: 8, x: 0, y: 3)
+                                        )
                                 }
                                 .buttonStyle(ClickSoundButtonStyle())
+                            } else {
+                                // 占位，保持布局
+                                Spacer()
+                                    .frame(width: 44, height: 44)
+                            }
+                            
+                            // 文本内容
+                            Text(page.text)
+                                .font(AppTheme.font(size: fontSize))
+                                .foregroundColor(Color(hex: "5D4E37"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(6)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 16)
+                                .frame(maxWidth: .infinity)
+                                .frame(maxHeight: size.height * 0.22) // 限制文本框最大高度为屏幕高度的22%
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(Color.white.opacity(0.95))
+                                        .shadow(color: Color(hex: "D4A574").opacity(0.3), radius: 12, x: 0, y: 4)
+                                )
+                            
+                            // 右箭头（最后一页不显示）
+                            if currentIndex < totalPages - 1 {
+                                Button(action: {
+                                    onPageChange?(currentIndex + 1)
+                                }) {
+                                    Image(systemName: "chevron.right")
+                                        .font(AppTheme.font(size: 20))
+                                        .foregroundColor(Color(hex: "5D4E37"))
+                                        .frame(width: 44, height: 44)
+                                        .background(
+                                            Circle()
+                                                .fill(Color.white)
+                                                .shadow(color: Color(hex: "D4A574").opacity(0.3), radius: 8, x: 0, y: 3)
+                                        )
+                                }
+                                .buttonStyle(ClickSoundButtonStyle())
+                            } else {
+                                // 占位，保持布局
+                                Spacer()
+                                    .frame(width: 44, height: 44)
                             }
                         }
-                        .background(
-                            BlurView(style: .systemThinMaterialDark)
-                                .cornerRadius(15)
-                        )
-                        .frame(maxWidth: .infinity)
                         
-                        // 右箭头（最后一页不显示）
-                        if currentIndex < totalPages - 1 {
+                        // 语音按钮：位于文本框右上角
+                        if AudioCache.shared.hasCache(for: page.id) {
                             Button(action: {
-                                onPageChange?(currentIndex + 1)
+                                if audioPlayer.currentPageId == page.id && audioPlayer.isPlaying {
+                                    audioPlayer.stop()
+                                } else {
+                                    audioPlayer.play(pageId: page.id)
+                                }
                             }) {
-                                Image(systemName: "chevron.right")
-                                    .font(AppTheme.font(size: 24))
+                                Image(systemName: audioPlayer.currentPageId == page.id && audioPlayer.isPlaying ? "speaker.wave.2.fill" : "speaker.wave.2")
+                                    .font(AppTheme.font(size: 20))
                                     .foregroundColor(.white)
-                                    .frame(width: 44, height: 44)
-                                    .background(Color.white.opacity(0.2), in: Circle())
+                                    .frame(width: 50, height: 50)
+                                    .background(
+                                        Circle()
+                                            .fill(
+                                                audioPlayer.currentPageId == page.id && audioPlayer.isPlaying
+                                                ? LinearGradient(
+                                                    colors: [Color(hex: "8B7355"), Color(hex: "5D4E37")],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                                : LinearGradient(
+                                                    colors: [Color(hex: "5D4E37"), Color(hex: "5D4E37")],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .shadow(color: Color(hex: "D4A574").opacity(0.4), radius: 10, x: 0, y: 4)
+                                    )
+                                    .scaleEffect(audioPlayer.currentPageId == page.id && audioPlayer.isPlaying ? 1.0 : 1.0)
+                                    .animation(
+                                        audioPlayer.currentPageId == page.id && audioPlayer.isPlaying
+                                        ? Animation.easeInOut(duration: 1.5).repeatForever(autoreverses: true)
+                                        : .default,
+                                        value: audioPlayer.currentPageId == page.id && audioPlayer.isPlaying
+                                    )
+                                    .opacity(audioPlayer.currentPageId == page.id && audioPlayer.isPlaying ? 1.0 : 0.9)
                             }
                             .buttonStyle(ClickSoundButtonStyle())
-                        } else {
-                            // 占位，保持布局
-                            Spacer()
-                                .frame(width: 44, height: 44)
+                            .offset(x: -50, y: -90) // 向左32，向上8，让按钮位于文本框右上角附近
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 16)
+                    .opacity(isUIVisible ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: isUIVisible)
                 }
                 .frame(width: size.width, height: size.height)
             }
@@ -329,6 +409,7 @@ struct PageViewController: UIViewControllerRepresentable {
     let appOB: AppObservableObject
     let audioPlayer: AudioPlayerManager
     let fontSize: CGFloat
+    @Binding var isUIVisible: Bool
     
     func makeUIViewController(context: Context) -> UIPageViewController {
         let pageVC = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
@@ -380,6 +461,7 @@ struct PageViewController: UIViewControllerRepresentable {
                 appOB: parent.appOB,
                 audioPlayer: parent.audioPlayer,
                 fontSize: parent.fontSize,
+                isUIVisible: parent.$isUIVisible,
                 onPageChange: { [weak self] newIndex in
                     self?.parent.currentPageIndex = newIndex
                 }
@@ -420,8 +502,9 @@ class PageHostingController: UIHostingController<AnyView> {
     let appOB: AppObservableObject
     let audioPlayer: AudioPlayerManager
     let onPageChange: (Int) -> Void
+    @Binding var isUIVisible: Bool
     
-    init(page: StoryPage, currentIndex: Int, totalPages: Int, shouldRequestImageGeneration: Bool, appOB: AppObservableObject, audioPlayer: AudioPlayerManager, fontSize: CGFloat, onPageChange: @escaping (Int) -> Void) {
+    init(page: StoryPage, currentIndex: Int, totalPages: Int, shouldRequestImageGeneration: Bool, appOB: AppObservableObject, audioPlayer: AudioPlayerManager, fontSize: CGFloat, isUIVisible: Binding<Bool>, onPageChange: @escaping (Int) -> Void) {
         self.page = page
         self.fontSize = fontSize
         self.currentIndex = currentIndex
@@ -430,13 +513,15 @@ class PageHostingController: UIHostingController<AnyView> {
         self.appOB = appOB
         self.audioPlayer = audioPlayer
         self.onPageChange = onPageChange
+        self._isUIVisible = isUIVisible
         let pageView = StoryPageView(
             page: page,
             shouldRequestImageGeneration: shouldRequestImageGeneration,
             currentIndex: currentIndex,
             totalPages: totalPages,
             onPageChange: onPageChange,
-            fontSize: fontSize
+            fontSize: fontSize,
+            isUIVisible: isUIVisible
         )
         .environmentObject(appOB)
         .environmentObject(audioPlayer)
@@ -451,7 +536,8 @@ class PageHostingController: UIHostingController<AnyView> {
             currentIndex: currentIndex,
             totalPages: totalPages,
             onPageChange: onPageChange,
-            fontSize: fontSize
+            fontSize: fontSize,
+            isUIVisible: $isUIVisible
         )
         .environmentObject(appOB)
         .environmentObject(audioPlayer)

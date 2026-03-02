@@ -41,6 +41,25 @@ final class BackgroundMusicManager: ObservableObject {
         }
     }
 
+    /// Pause background music (can resume later).
+    func pause() {
+        player?.pause()
+        isPlaying = false
+        print("[BackgroundMusicManager] Paused")
+    }
+    
+    /// Resume background music from where it was paused.
+    func resume() {
+        guard let player = player else {
+            // 如果没有播放器，则播放新曲目
+            playRandomTrack()
+            return
+        }
+        player.play()
+        isPlaying = true
+        print("[BackgroundMusicManager] Resumed")
+    }
+
     /// Stop background music.
     func stop() {
         player?.stop()

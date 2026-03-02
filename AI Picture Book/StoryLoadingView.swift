@@ -18,104 +18,174 @@ private enum LoadingPhase {
 struct StoryLoadingView: View {
     @Environment(AppState.self) private var appState
     @EnvironmentObject var appOB: AppObservableObject
+    @State private var fishCoinManager = FishCoinManager.shared
     @State private var progress: Double = 0.0
-    @State private var rotationAngle: Double = 0
     @State private var phase: LoadingPhase = .generating
     @State private var preloadCurrent: Int = 0
     @State private var preloadTotal: Int = 0
+    @State private var hasRefunded = false
+    @State private var hasConsumedCoins = false
+    @State private var rotationAngle: Double = 0
     
     var body: some View {
         ZStack {
-            AppTheme.bgPrimary
-                .ignoresSafeArea()
+            // 渐变背景
+            LinearGradient(
+                colors: [
+                    Color(hex: "FFF8F0"),
+                    Color(hex: "FFF0E6"),
+                    Color(hex: "FFE8DC")
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
             if phase == .failed {
                 // 失败状态：友好提示 + 重试按钮
                 VStack(spacing: 24) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(AppTheme.font(size: 56))
-                        .foregroundStyle(AppTheme.accentOrange)
-                    Text("Server Busy")
-                        .font(AppTheme.font(size: 22))
-                        .foregroundStyle(AppTheme.textPrimary)
-                    Text("Please try again later")
+                        .foregroundStyle(Color(hex: "FFB84D"))
+                    
+                    Text("Oops!")
+                        .font(AppTheme.fontBold(size: 26))
+                        .foregroundStyle(Color(hex: "5D4E37"))
+                    
+                    Text("Something went wrong.\nPlease try again.")
                         .font(AppTheme.font(size: 16))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(Color(hex: "8B7355"))
                         .multilineTextAlignment(.center)
-                        .frame(width: 280)
-                    HStack(spacing: 16) {
+                        .lineSpacing(4)
+                    
+                    HStack(spacing: 12) {
                         Button(action: {
                             print("[StoryLoadingView] 用户点击 Home")
                             appState.backToHome()
                         }) {
                             Text("Home")
-                                .font(AppTheme.font(size: 16))
-                                .foregroundStyle(AppTheme.textPrimary)
-                                .frame(width: 160)
-                                .padding(.vertical, 14)
-                                .background(AppTheme.cardBackground.opacity(0.8), in: Capsule())
+                                .font(AppTheme.fontBold(size: 16))
+                                .foregroundStyle(Color(hex: "8B7355"))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .fill(Color.white)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(Color(hex: "D4A574"), lineWidth: 1.5)
+                                )
                         }
                         .buttonStyle(ClickSoundButtonStyle())
+                        
                         Button(action: {
                             print("[StoryLoadingView] 用户点击重试")
+                            
+                            // 检查小鱼干余额
+                            if !fishCoinManager.canGenerateStory() {
+                                print("[StoryLoadingView] 小鱼干不足，无法重试")
+                                appState.backToHome()
+                                return
+                            }
+                            
+                            // 重试时需要重新扣除小鱼干
+                            if !fishCoinManager.consumeForStoryGeneration() {
+                                print("[StoryLoadingView] 扣除小鱼干失败")
+                                appState.backToHome()
+                                return
+                            }
+                            
                             phase = .generating
                             progress = 0
+                            hasRefunded = false
+                            hasConsumedCoins = true
                             startStoryGeneration()
                             startLoadingAnimation()
                         }) {
                             Text("Retry")
-                                .font(AppTheme.font(size: 16))
+                                .font(AppTheme.fontBold(size: 16))
                                 .foregroundStyle(.white)
-                                .frame(width: 160)
-                                .padding(.vertical, 14)
-                                .background(AppTheme.primary, in: Capsule())
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Color(hex: "FF9A8B"), Color(hex: "FF6A88")],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                )
+                                .shadow(color: Color(hex: "FF6A88").opacity(0.3), radius: 8, x: 0, y: 4)
                         }
                         .buttonStyle(ClickSoundButtonStyle())
                     }
+                    .padding(.horizontal, 32)
                     .padding(.top, 8)
                 }
                 .padding(32)
             } else {
-                VStack(spacing: 24) {
-                    ZStack {
-                        Circle()
-                            .stroke(AppTheme.primary.opacity(0.2), lineWidth: 4)
-                            .frame(width: 80, height: 80)
+                VStack(spacing: 32) {
+                    Spacer()
+                    
+                    // 蝴蝶动画（添加原地旋转效果）
+                    LottieView(
+                        animationName: "buttefly-animation_13100012",
+                        subdirectory: "lottie",
+                        contentMode: .scaleAspectFit
+                    )
+                    .frame(width: 200, height: 200)
+                    .rotationEffect(.degrees(rotationAngle))
+                    
+                    VStack(spacing: 12) {
+                        Text(phaseTitle)
+                            .font(AppTheme.fontBold(size: 24))
+                            .foregroundStyle(Color(hex: "5D4E37"))
                         
-                        Circle()
-                            .trim(from: 0, to: 0.7)
-                            .stroke(AppTheme.primary, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                            .frame(width: 80, height: 80)
-                            .rotationEffect(.degrees(rotationAngle))
+                        Text(phaseSubtitle)
+                            .font(AppTheme.font(size: 15))
+                            .foregroundStyle(Color(hex: "8B7355"))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .frame(width: 300)
                     }
                     
-                    Text(phaseTitle)
-                        .font(AppTheme.font(size: 20))
-                        .foregroundStyle(AppTheme.textPrimary)
-                    
-                    Text(phaseSubtitle)
-                        .font(AppTheme.font(size: 14))
-                        .foregroundStyle(AppTheme.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 326)
-                    
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule()
-                                .fill(AppTheme.secondary)
-                            Capsule()
-                                .fill(AppTheme.primary)
-                                .frame(width: geo.size.width * progress)
+                    // 进度条
+                    VStack(spacing: 8) {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 999)
+                                    .fill(Color(hex: "D4A574").opacity(0.2))
+                                
+                                RoundedRectangle(cornerRadius: 999)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color(hex: "FF9A8B"), Color(hex: "FF6A88")],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(width: geo.size.width * progress)
+                            }
                         }
+                        .frame(height: 8)
+                        .frame(width: 280)
+                        
+                        Text("\(Int(progress * 100))%")
+                            .font(AppTheme.fontBold(size: 13))
+                            .foregroundStyle(Color(hex: "A0826D"))
                     }
-                    .frame(height: 8)
-                    .frame(width: 326)
+                    
+                    Spacer()
                 }
                 .padding(32)
             }
         }
         .onAppear {
             print("[StoryLoadingView] onAppear")
+            hasConsumedCoins = true // 标记已经在 ThemeInputModalView 中扣除过
             startStoryGeneration()
             startLoadingAnimation()
         }
@@ -124,11 +194,11 @@ struct StoryLoadingView: View {
     private var phaseTitle: String {
         switch phase {
         case .generating:
-            return "Creating your story..."
+            return "Creating Magic..."
         case .preloading:
-            return "Loading images..."
+            return "Almost Ready..."
         case .ready:
-            return "Ready"
+            return "All Set!"
         case .failed:
             return ""
         }
@@ -137,14 +207,14 @@ struct StoryLoadingView: View {
     private var phaseSubtitle: String {
         switch phase {
         case .generating:
-            return "AI is creating a personalized story for you. Please wait..."
+            return "Our AI is crafting a personalized story just for you. This may take a moment."
         case .preloading:
             if preloadTotal > 0 {
-                return "Loading \(preloadCurrent)/\(preloadTotal) (images & audio)"
+                return "Loading beautiful illustrations and audio\n(\(preloadCurrent)/\(preloadTotal))"
             }
-            return "Getting ready to read"
+            return "Preparing your magical adventure"
         case .ready:
-            return "Opening your story book"
+            return "Your story is ready to read!"
         case .failed:
             return ""
         }
@@ -191,8 +261,8 @@ struct StoryLoadingView: View {
     }
     
     private func startLoadingAnimation() {
-        // 旋转动画（持续旋转）
-        withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
+        // 蝴蝶旋转动画（持续旋转）
+        withAnimation(.linear(duration: 8.0).repeatForever(autoreverses: false)) {
             rotationAngle = 360
         }
         
@@ -226,6 +296,12 @@ struct StoryLoadingView: View {
                         print("[StoryLoadingView] 生成完成，状态：\(appOB.status)，绘本页数：\(appOB.pages.count)")
                         
                         if appOB.status == .failed {
+                            // 生成失败，退还小鱼干（仅当已扣除时）
+                            if !hasRefunded && hasConsumedCoins {
+                                fishCoinManager.refundForFailedGeneration()
+                                hasRefunded = true
+                                print("[StoryLoadingView] 生成失败，已退还小鱼干")
+                            }
                             phase = .failed
                             return
                         }

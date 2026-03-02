@@ -40,10 +40,21 @@ struct OBStartView: View {
         }
         .onAppear {
             print("[OBStartView] onAppear, auto-advance to OB first page in 2s")
+            setOrientation(.portrait)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 appState.enterOnboarding()
             }
         }
+    }
+    
+    // MARK: - 竖屏控制
+    private func setOrientation(_ orientation: UIInterfaceOrientationMask) {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first
+        else { return }
+        
+        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation))
     }
 }
 

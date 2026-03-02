@@ -22,10 +22,12 @@ enum AppPage: Int, CaseIterable {
     case obRelationship = 10
     case obRelationshipMotivation = 11
     case obPersonalizing = 12
-    case paywall = 13
-    case home = 14
-    case storyLoading = 15
-    case storyBook = 16
+    case obAllSetUp = 13
+    case obChartMotivation = 14
+    case paywall = 15
+    case home = 16
+    case storyLoading = 17
+    case storyBook = 18
 }
 
 /// 用户选择年龄段
@@ -127,6 +129,22 @@ final class AppState {
     /// 当前要查看的已保存故事（从「最近的故事」点击进入时使用）
     var viewingSavedStory: SavedStory?
     
+    /// 是否显示小鱼干商店
+    var showFishCoinShop: Bool = false
+    
+    /// 是否显示评分弹窗
+    var showRateUs: Bool = false
+    
+    /// 是否显示感谢提示
+    var showThankYouToast: Bool = false
+    
+    /// 是否已经从绘本返回过首页（用于触发评分弹窗）
+    var hasReturnedFromStoryBook: Bool = false
+    
+    /// 是否已经显示过评分弹窗
+    @ObservationIgnored
+    @AppStorage("hasShownRateUs") var hasShownRateUs = false
+    
     var childAge: ChildAge? {
         get { ChildAge(rawValue: childAgeRaw) }
         set { childAgeRaw = newValue?.rawValue ?? "" }
@@ -155,14 +173,22 @@ final class AppState {
         currentPage = .obGetStarted
     }
     
-    /// 请求 OB 下一页：先播进度条 sparkles，播完后再调用 nextOnboardingPage（OB 内容页用）
+    /// 请求 OB 下一页：直接跳转，不再依赖 sparkles 动画
     func requestOBNextPage() {
         guard !obPendingSparkles else {
-            print("[AppState] requestOBNextPage 忽略：已在播放 sparkles")
+            print("[AppState] requestOBNextPage 忽略：已在处理跳转")
             return
         }
+        
         obPendingSparkles = true
-        print("[AppState] requestOBNextPage, obPendingSparkles = true")
+        print("[AppState] requestOBNextPage, 直接跳转下一页")
+        
+        // 短暂延迟后跳转，给用户一个视觉反馈
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self = self else { return }
+            self.obPendingSparkles = false
+            self.nextOnboardingPage()
+        }
     }
 
     /// OB 下一页（sparkles 播完后由 OBFlowContainer 调用，或非 OB 流程直接调用）
@@ -180,7 +206,9 @@ final class AppState {
             case .obNameMotivation: currentPage = .obRelationship
             case .obRelationship: currentPage = .obRelationshipMotivation
             case .obRelationshipMotivation: currentPage = .obPersonalizing
-            case .obPersonalizing: currentPage = .paywall
+            case .obPersonalizing: currentPage = .obAllSetUp
+            case .obAllSetUp: currentPage = .obChartMotivation
+            case .obChartMotivation: currentPage = .paywall
             default: break
             }
         }
@@ -208,6 +236,8 @@ final class AppState {
             case .obNameMotivation: currentPage = .obName
             case .obRelationship: currentPage = .obNameMotivation
             case .obRelationshipMotivation: currentPage = .obRelationship
+            case .obAllSetUp: currentPage = .obPersonalizing
+            case .obChartMotivation: currentPage = .obAllSetUp
             default: break
             }
         }
@@ -245,7 +275,17 @@ final class AppState {
     func backToHome() {
         currentPage = .home
         viewingSavedStory = nil
+        hasReturnedFromStoryBook = true
         print("[AppState] backToHome")
+        
+        // 首次从绘本返回首页时，显示评分弹窗
+        if !hasShownRateUs {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.showRateUs = true
+                self.hasShownRateUs = true
+                print("[AppState] 显示评分弹窗")
+            }
+        }
     }
     
     /// 查看已保存的故事
@@ -263,6 +303,17 @@ final class AppState {
         } else {
             currentPage = .obGetStarted
             print("[AppState] onSplashComplete -> obGetStarted")
+        }
+    }
+    
+    /// 显示感谢提示
+    func showThankYouMessage() {
+        showThankYouToast = true
+        print("[AppState] 显示感谢提示")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.showThankYouToast = false
+            print("[AppState] 隐藏感谢提示")
         }
     }
 }

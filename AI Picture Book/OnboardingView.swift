@@ -205,7 +205,7 @@ struct OBAgeContent: View {
     @State private var selectedAge: ChildAge?
     var body: some View {
         VStack(spacing: 32) {
-            (Text("How old").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(AppTheme.obHighlightColor) + Text(" is your child?").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight))
+            (Text("How old").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(Color(hex: "FF6A88")) + Text(" is your child?").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight))
                 .multilineTextAlignment(.center)
                 .padding(.top, 24)
             VStack(spacing: 16) {
@@ -259,7 +259,7 @@ struct OBAgeMotivationContent: View {
                 }
                 Text(motivationText)
                     .font(AppTheme.fontBold(size: 24))
-                    .foregroundStyle(AppTheme.obBodyText)
+                    .foregroundStyle(AppTheme.textOnLight)
                     .multilineTextAlignment(.leading)
                     .padding(.horizontal, 0)
             }
@@ -285,7 +285,7 @@ struct OBGenderContent: View {
     @State private var selectedGender: ChildGender?
     var body: some View {
         VStack(spacing: 32) {
-            (Text("What is your child's ").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight) + Text("gender").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(AppTheme.obHighlightColor) + Text("?").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight))
+            (Text("What is your child's ").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight) + Text("gender").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(Color(hex: "FF6A88")) + Text("?").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight))
                 .multilineTextAlignment(.center)
                 .padding(.top, 24)
             HStack(spacing: 16) {
@@ -321,7 +321,7 @@ struct OBAvatarContent: View {
     private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
     var body: some View {
         VStack(spacing: 32) {
-            (Text("Choose your child's ").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight) + Text("avatar").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(AppTheme.obHighlightColor))
+            (Text("Choose your child's ").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight) + Text("avatar").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(Color(hex: "FF6A88")))
                 .multilineTextAlignment(.center)
                 .padding(.top, 24)
             LazyVGrid(columns: columns, spacing: 16) {
@@ -354,7 +354,7 @@ struct OBNameContent: View {
     @State private var nameText: String = ""
     var body: some View {
         VStack(spacing: 32) {
-            (Text("Your child's ").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight) + Text("name").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(AppTheme.obHighlightColor))
+            (Text("Your child's ").font(AppTheme.fontBold(size: 28)).foregroundStyle(AppTheme.textOnLight) + Text("name").font(AppTheme.fontRowdiesBold(size: 28)).foregroundStyle(Color(hex: "FF6A88")))
                 .multilineTextAlignment(.center)
                 .padding(.top, 24)
             TextField("Child's first name or nickname", text: $nameText)
@@ -436,9 +436,7 @@ struct OBNameMotivationContent: View {
                         .foregroundStyle(AppTheme.textOnLight)
                 }
                 
-                Text("Get ready for \(childName)'s reading journey!")
-                    .font(AppTheme.fontBold(size: 26))
-                    .foregroundStyle(AppTheme.textOnLight)
+                (Text("Get ready for ").font(AppTheme.fontBold(size: 26)).foregroundStyle(AppTheme.textOnLight) + Text("\(childName)").font(AppTheme.fontRowdiesBold(size: 26)).foregroundStyle(Color(hex: "FF6A88")) + Text("'s reading journey!").font(AppTheme.fontBold(size: 26)).foregroundStyle(AppTheme.textOnLight))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
@@ -534,6 +532,20 @@ struct OBRelationshipMotivationContent: View {
         default: return -20
         }
     }
+    
+    private var parentRotation: Angle {
+        switch avatarPhase {
+        case 2: return .degrees(-20)
+        default: return .degrees(0)
+        }
+    }
+    
+    private var childRotation: Angle {
+        switch avatarPhase {
+        case 2: return .degrees(20)
+        default: return .degrees(0)
+        }
+    }
 
     var body: some View {
         VStack(spacing: 40) {
@@ -561,6 +573,7 @@ struct OBRelationshipMotivationContent: View {
                     }
                     .frame(width: avatarCircleSize, height: avatarCircleSize)
                     .clipShape(Circle())
+                    .rotationEffect(parentRotation)
                     .offset(x: parentOffsetX)
                     .opacity(avatarsVisible ? 1 : 0)
                     if let avatar = appState.childAvatar {
@@ -576,6 +589,7 @@ struct OBRelationshipMotivationContent: View {
                         }
                         .frame(width: avatarCircleSize, height: avatarCircleSize)
                         .clipShape(Circle())
+                        .rotationEffect(childRotation)
                         .offset(x: childOffsetX)
                         .opacity(avatarsVisible ? 1 : 0)
                     } else {
@@ -587,6 +601,7 @@ struct OBRelationshipMotivationContent: View {
                                 .foregroundStyle(Color(hex: "FF6B9D"))
                         }
                         .frame(width: avatarCircleSize, height: avatarCircleSize)
+                        .rotationEffect(childRotation)
                         .offset(x: childOffsetX)
                         .opacity(avatarsVisible ? 1 : 0)
                     }
@@ -614,9 +629,8 @@ struct OBRelationshipMotivationContent: View {
                     showXAndYText = true
                 }
             }
-            Text("\(relationshipText) and \(childName)")
+            (Text(relationshipText).foregroundStyle(Color(hex: "F85162")) + Text(" and ").foregroundStyle(AppTheme.textOnLight) + Text(childName).foregroundStyle(Color(hex: "F85162")))
                 .font(AppTheme.fontBold(size: 14))
-                .foregroundStyle(AppTheme.textOnLight)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
@@ -648,52 +662,473 @@ struct OBRelationshipMotivationPage: View {
     }
 }
 
-// MARK: - OB Personalizing 页：进度条 0-100%
+// MARK: - OB Personalizing 页：四段进度条 + Did You Know 区域
+
+private let personalizingStepDuration: TimeInterval = 2.0
+private let personalizingTotalDuration: TimeInterval = 8.2
 
 struct OBPersonalizingPage: View {
     @Environment(AppState.self) private var appState
-    @State private var progress: Double = 0.0
+    @State private var progress1: Double = 0
+    @State private var progress2: Double = 0
+    @State private var progress3: Double = 0
+    @State private var progress4: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color(hex: "FFFFFF")
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                Text("Personalizing...")
+                    .font(AppTheme.fontBold(size: 28))
+                    .foregroundStyle(AppTheme.textOnLight)
+                    .padding(.top, 40)
+                    .padding(.bottom, 24)
+                VStack(alignment: .leading, spacing: 20) {
+                    OBPersonalizingProgressRow(title: "Analyzing goals", progress: progress1)
+                    OBPersonalizingProgressRow(title: "Analyzing profile", progress: progress2)
+                    OBPersonalizingProgressRow(title: "Connecting AI", progress: progress3)
+                    OBPersonalizingProgressRow(title: "Personalization", progress: progress4)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 24)
+                
+                Spacer(minLength: 16)
+                
+                VStack(spacing: 16) {
+                    LottieView(
+                        animationName: "loading-animation_4330190",
+                        subdirectory: "lottie",
+                        contentMode: .scaleAspectFit
+                    )
+                    .frame(height: 120)
+                    .frame(maxWidth: .infinity)
+                    Text("Did You Know?")
+                        .font(AppTheme.fontBold(size: 22))
+                        .foregroundStyle(AppTheme.textOnLight)
+                    Text("Children are 19x more likely to read from an app when using it with a parent.")
+                        .font(AppTheme.font(size: 16))
+                        .foregroundStyle(AppTheme.obBodyText)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
+            }
+        }
+        .onAppear {
+            setOrientation(.portrait)
+            runSequentialProgress()
+        }
+    }
+    
+    // MARK: - 竖屏控制
+    private func setOrientation(_ orientation: UIInterfaceOrientationMask) {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first
+        else { return }
+        
+        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation))
+    }
+    
+    private func runSequentialProgress() {
+        let appearDelay: TimeInterval = 0.2
+        let segment1Duration: TimeInterval = 0.4
+        let segment2Duration: TimeInterval = 1.0
+        let segment3Duration: TimeInterval = 0.6
+        let barTotal: TimeInterval = segment1Duration + segment2Duration + segment3Duration
+
+        func runBarSegments(setProgress: @escaping (Double) -> Void, startAt: TimeInterval) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + startAt) {
+                withAnimation(.linear(duration: segment1Duration)) { setProgress(0.35) }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + startAt + segment1Duration) {
+                withAnimation(.linear(duration: segment2Duration)) { setProgress(0.72) }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + startAt + segment1Duration + segment2Duration) {
+                withAnimation(.linear(duration: segment3Duration)) { setProgress(1.0) }
+            }
+        }
+
+        runBarSegments(setProgress: { progress1 = $0 }, startAt: appearDelay)
+        runBarSegments(setProgress: { progress2 = $0 }, startAt: appearDelay + barTotal)
+        runBarSegments(setProgress: { progress3 = $0 }, startAt: appearDelay + barTotal * 2)
+        runBarSegments(setProgress: { progress4 = $0 }, startAt: appearDelay + barTotal * 3)
+        DispatchQueue.main.asyncAfter(deadline: .now() + personalizingTotalDuration) {
+            appState.nextOnboardingPage()
+        }
+    }
+}
+
+private struct OBPersonalizingProgressRow: View {
+    let title: String
+    let progress: Double
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(AppTheme.font(size: 16))
+                .foregroundStyle(AppTheme.textOnLight)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.black.opacity(0.1))
+                        .frame(height: 10)
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(AppTheme.primary)
+                        .frame(width: geo.size.width * CGFloat(progress), height: 10)
+                }
+            }
+            .frame(height: 10)
+        }
+    }
+}
+
+// MARK: - OB All Set Up 页：头像+名字 + Woohoo! + Continue → Paywall
+
+struct OBAllSetUpPage: View {
+    @Environment(AppState.self) private var appState
+    
+    private var childName: String {
+        let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "your child" : name
+    }
     
     var body: some View {
         ZStack {
-            AppTheme.bgPrimary
+            Color(hex: "FFFFFF")
                 .ignoresSafeArea()
-            
-            VStack(spacing: 32) {
-                Spacer()
-                Text("Personalizing...")
-                    .font(AppTheme.fontBold(size: 28))
-                    .foregroundStyle(AppTheme.textPrimary)
-                
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(AppTheme.secondary.opacity(0.3))
-                            .frame(height: 12)
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(AppTheme.primary)
-                            .frame(width: geo.size.width * CGFloat(progress), height: 12)
+            GeometryReader { geo in
+                VStack(spacing: 0) {
+                    ZStack {
+                        LottieView(
+                            animationName: "confetti-animation_4560441",
+                            subdirectory: "lottie",
+                            contentMode: .scaleAspectFit
+                        )
+                        .frame(width: geo.size.width, height: geo.size.height * 0.5)
+                        .allowsHitTesting(false)
+                    }
+                    .frame(height: geo.size.height * 0.5)
+                    Spacer(minLength: 0)
+                }
+            }
+            .ignoresSafeArea()
+            VStack(spacing: 24) {
+                Spacer(minLength: 0)
+                VStack(spacing: 12) {
+                    if let avatar = appState.childAvatar {
+                        ZStack {
+                            Circle()
+                                .fill(Color(hex: avatar.color))
+                            LottieView(
+                                animationName: avatar.lottieAnimationName,
+                                subdirectory: "lottie",
+                                contentMode: .scaleAspectFit
+                            )
+                            .frame(width: 134, height: 134)
+                        }
+                        .frame(width: 112, height: 112)
+                        .clipShape(Circle())
+                    } else {
+                        Circle()
+                            .fill(AppTheme.secondary.opacity(0.6))
+                            .frame(width: 112, height: 112)
+                            .overlay(
+                                Image(systemName: "face.smiling")
+                                    .font(AppTheme.font(size: 48))
+                                    .foregroundStyle(AppTheme.textOnLight)
+                            )
                     }
                 }
-                .frame(height: 12)
-                .frame(width: 280)
-                
-                Text("\(Int(progress * 100))%")
-                    .font(AppTheme.font(size: 18))
-                    .foregroundStyle(AppTheme.textSecondary)
-                
-                Spacer()
+                .offset(y: -80)
+                Text("Woohoo!")
+                    .font(AppTheme.fontBold(size: 28))
+                    .foregroundStyle(AppTheme.textOnLight)
+                (Text(childName).foregroundStyle(Color(hex: "F85162")) + Text("'s profile is all set up.").foregroundStyle(AppTheme.obBodyText))
+                    .font(AppTheme.font(size: 16))
+                    .multilineTextAlignment(.center)
+                Spacer(minLength: 0)
+                OBPrimaryButton(title: "Continue") {
+                    appState.nextOnboardingPage()
+                }
+                .padding(.bottom, 32)
             }
-            .padding(32)
+            .padding(.horizontal, 32)
         }
         .onAppear {
-            withAnimation(.linear(duration: 2.5)) {
-                progress = 1.0
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                appState.nextOnboardingPage()
+            setOrientation(.portrait)
+        }
+    }
+    
+    // MARK: - 竖屏控制
+    private func setOrientation(_ orientation: UIInterfaceOrientationMask) {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first
+        else { return }
+        
+        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation))
+    }
+}
+
+// MARK: - OB 折线图激励页：6 节点快增长折线，x 轴 4 个短描述，第 4 节点展示头像
+
+/// 第 5、6 节点更高，形成更陡峭的“一飞冲天”曲线
+private let chartMotivationYValues: [CGFloat] = [0, 0.1, 0.22, 0.38, 0.68, 1.0]
+private let chartXAxisLabels = ["Start", "3 stories", "6 stories", "First book"]
+/// 前 4 节点几乎占满屏幕宽度，5～6 在右侧收尾
+private let chartMotivationXRatios: [CGFloat] = [0, 0.25, 0.5, 0.75, 0.88, 1.0]
+
+struct OBChartMotivationPage: View {
+    @Environment(AppState.self) private var appState
+
+    private var childName: String {
+        let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "your child" : name
+    }
+
+    private var readingPronoun: String {
+        appState.childGender == .girl ? "her" : "his"
+    }
+
+    var body: some View {
+        ZStack {
+            Color(hex: "FFFFFF")
+                .ignoresSafeArea()
+            GeometryReader { geo in
+                let chartHeight: CGFloat = 320
+                let titleAreaHeight: CGFloat = 80
+                let topOffset = max(0, geo.size.height * 0.5 - chartHeight * 0.5 - titleAreaHeight)
+                VStack(spacing: 24) {
+                    Spacer(minLength: 0)
+                        .frame(height: topOffset)
+                    (Text("In just 10 picture book accompany, ").font(AppTheme.fontBold(size: 20)).foregroundStyle(AppTheme.textOnLight) + Text(childName).font(AppTheme.fontBold(size: 20)).foregroundStyle(Color(hex: "F85162")) + Text(" will be reading \(readingPronoun) first book!").font(AppTheme.fontBold(size: 20)).foregroundStyle(AppTheme.textOnLight))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                    OBChartMotivationChartView(showAvatarAtIndex: 3)
+                        .environment(appState)
+                        .frame(height: chartHeight)
+                        .padding(.horizontal, 16)
+                    Spacer(minLength: 0)
+                    OBPrimaryButton(title: "Continue") {
+                        appState.nextOnboardingPage()
+                    }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 32)
+                }
             }
         }
+        .onAppear {
+            setOrientation(.portrait)
+        }
+    }
+    
+    // MARK: - 竖屏控制
+    private func setOrientation(_ orientation: UIInterfaceOrientationMask) {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first
+        else { return }
+        
+        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation))
+    }
+}
+
+private struct OBChartMotivationChartView: View {
+    @Environment(AppState.self) private var appState
+    var showAvatarAtIndex: Int
+
+    private let padding: CGFloat = 24
+    private let labelHeight: CGFloat = 48
+
+    @State private var chartOpacity: Double = 0
+    @State private var barsOpacity: Double = 0
+    @State private var barProgress: [CGFloat] = [0, 0, 0, 0]
+    @State private var barOpacities: [Double] = [0, 0, 0, 0]
+    @State private var lineTrim: CGFloat = 0
+    @State private var showLineAndAvatar: Bool = false
+
+    var body: some View {
+        GeometryReader { geo in
+            chartContent(size: geo.size)
+                .opacity(chartOpacity)
+                .onAppear {
+                    runChartEntranceAnimation()
+                }
+        }
+    }
+
+    private static func makePoints(size: CGSize, padding: CGFloat, labelHeight: CGFloat) -> [CGPoint] {
+        let w = size.width - padding * 2
+        let h = size.height - padding - labelHeight
+        let ratios = chartMotivationXRatios
+        return zip(chartMotivationYValues, ratios).map { yVal, xRatio in
+            CGPoint(x: padding + xRatio * w, y: padding + (1 - yVal) * h)
+        }
+    }
+
+    private func runChartEntranceAnimation() {
+        print("[OBChartMotivation] 开始折线图入场动画")
+        withAnimation(.easeInOut(duration: 0.4)) {
+            chartOpacity = 1
+        }
+        let barDelay: TimeInterval = 0.24
+        let fadeInDelay: TimeInterval = 0.4
+        let barFadeInDuration: TimeInterval = 0.3
+        let barGrowDuration: TimeInterval = 0.5
+        
+        for i in 0..<4 {
+            let startTime = fadeInDelay + barDelay * Double(i)
+            // 先渐入透明度
+            DispatchQueue.main.asyncAfter(deadline: .now() + startTime) {
+                withAnimation(.easeIn(duration: barFadeInDuration)) {
+                    var next = barOpacities
+                    next[i] = 1
+                    barOpacities = next
+                }
+            }
+            // 稍后开始高度增长
+            DispatchQueue.main.asyncAfter(deadline: .now() + startTime + barFadeInDuration * 0.3) {
+                withAnimation(.easeOut(duration: barGrowDuration)) {
+                    var next = barProgress
+                    next[i] = 1
+                    barProgress = next
+                }
+            }
+        }
+        let lineStart = fadeInDelay + barDelay * 4 + barFadeInDuration + barGrowDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + lineStart) {
+            withAnimation(.easeOut(duration: 1.2)) {
+                lineTrim = 1
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + lineStart + 0.7) {
+            withAnimation(.easeOut(duration: 0.5)) {
+                showLineAndAvatar = true
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func chartContent(size: CGSize) -> some View {
+        let points = Self.makePoints(size: size, padding: padding, labelHeight: labelHeight)
+        let w = size.width - padding * 2
+        let h = size.height - padding - labelHeight
+        let bottomY = padding + h
+        let barWidth = (w * 0.25) * 0.48
+        let firstFour = Array(points.prefix(4))
+        ZStack(alignment: .topLeading) {
+            ForEach(0..<4, id: \.self) { i in
+                if i < firstFour.count {
+                    ChartBarsShape(points: [firstFour[i]], bottomY: bottomY, barWidth: barWidth, barProgress: [barProgress[i]])
+                        .fill(AppTheme.secondary.opacity(0.4))
+                        .overlay(
+                            ChartBarsShape(points: [firstFour[i]], bottomY: bottomY, barWidth: barWidth, barProgress: [barProgress[i]])
+                                .stroke(AppTheme.secondary, lineWidth: 2.5)
+                        )
+                        .shadow(color: AppTheme.shadowColor.opacity(0.15), radius: 2, x: 0, y: 1)
+                        .opacity(barOpacities[i])
+                }
+            }
+            ChartLinePath(points: points)
+                .trim(from: 0, to: lineTrim)
+                .stroke(AppTheme.primary, style: StrokeStyle(lineWidth: 4.5, lineCap: .round, lineJoin: .round))
+                .shadow(color: AppTheme.primary.opacity(0.3), radius: 1, x: 0, y: 0)
+            if showLineAndAvatar {
+                ForEach(Array(points.enumerated()), id: \.offset) { _, pt in
+                    Circle()
+                        .fill(AppTheme.primary)
+                        .frame(width: 16, height: 16)
+                        .overlay(Circle().stroke(AppTheme.textOnLight.opacity(0.4), lineWidth: 2))
+                        .position(x: pt.x, y: pt.y)
+                }
+                if showAvatarAtIndex < points.count {
+                    let pt = points[showAvatarAtIndex]
+                    avatarView
+                        .frame(width: 48, height: 48)
+                        .position(x: pt.x, y: pt.y)
+                }
+            }
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                ZStack(alignment: .leading) {
+                    ForEach(0..<4, id: \.self) { i in
+                        Text(chartXAxisLabels[i])
+                            .font(AppTheme.font(size: 12))
+                            .foregroundStyle(AppTheme.obBodyText)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 64)
+                            .position(x: points[i].x, y: labelHeight / 2)
+                    }
+                }
+                .frame(height: labelHeight)
+                .frame(width: size.width)
+            }
+        }
+    }
+
+    private var avatarView: some View {
+        Group {
+            if let avatar = appState.childAvatar {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: avatar.color))
+                    LottieView(
+                        animationName: avatar.lottieAnimationName,
+                        subdirectory: "lottie",
+                        contentMode: .scaleAspectFit
+                    )
+                    .frame(width: 80, height: 80)
+                }
+                .frame(width: 48, height: 48)
+                .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(AppTheme.secondary.opacity(0.6))
+                    .frame(width: 48, height: 48)
+                    .overlay(
+                        Image(systemName: "face.smiling")
+                            .font(AppTheme.font(size: 22))
+                            .foregroundStyle(AppTheme.textOnLight)
+                    )
+            }
+        }
+    }
+}
+
+private struct ChartLinePath: Shape {
+    var points: [CGPoint]
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard let first = points.first else { return path }
+        path.move(to: first)
+        for p in points.dropFirst() { path.addLine(to: p) }
+        return path
+    }
+}
+
+/// 前 4 个节点向 X 轴下垂的柱状条（圆角顶，卡通感）；barProgress 控制每根柱子高度比例用于入场动画
+private struct ChartBarsShape: Shape {
+    var points: [CGPoint]
+    var bottomY: CGFloat
+    var barWidth: CGFloat
+    var barProgress: [CGFloat] = [1, 1, 1, 1]
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let cornerRadius: CGFloat = min(8, barWidth / 2)
+        for (i, pt) in points.enumerated() {
+            let progress = i < barProgress.count ? barProgress[i] : 1
+            let fullHeight = bottomY - pt.y
+            let barHeight = fullHeight * progress
+            guard barHeight > 0 else { continue }
+            let r = CGRect(x: pt.x - barWidth / 2, y: bottomY - barHeight, width: barWidth, height: barHeight)
+            path.addRoundedRect(in: r, cornerSize: CGSize(width: cornerRadius, height: cornerRadius))
+        }
+        return path
     }
 }
 
@@ -862,6 +1297,19 @@ struct OBFlowContainerView: View {
                 .clipped()
             }
         }
+        .onAppear {
+            setOrientation(.portrait)
+        }
+    }
+    
+    // MARK: - 竖屏控制
+    private func setOrientation(_ orientation: UIInterfaceOrientationMask) {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first
+        else { return }
+        
+        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation))
     }
 }
 
@@ -1042,7 +1490,7 @@ struct OBAvatarCell: View {
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(isSelected ? AppTheme.primary : Color.clear, lineWidth: 3)
+                        .stroke(isSelected ? Color(hex: "FF6A88") : Color.clear, lineWidth: 3)
                 )
                 .shadow(color: AppTheme.shadowColor, radius: 12, x: 0, y: 2)
                 
@@ -1050,7 +1498,7 @@ struct OBAvatarCell: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(AppTheme.font(size: 24))
                         .foregroundStyle(.white)
-                        .background(AppTheme.primary, in: Circle())
+                        .background(Color(hex: "FF6A88"), in: Circle())
                         .offset(x: 4, y: 4)
                 }
             }
