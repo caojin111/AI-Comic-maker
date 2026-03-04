@@ -63,12 +63,12 @@ struct HomeView: View {
                     // 中部创作按钮区域
                     createStorySection
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 28)
                     
                     // 底部历史记录区域
                     recentStoriesSection
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 28)
                 }
             }
         }
@@ -346,7 +346,7 @@ struct HomeView: View {
     
     // MARK: - 创作按钮区域
     private var createStorySection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // 主创作按钮
             Button(action: {
                 print("[HomeView] 点击创作按钮")
@@ -381,7 +381,7 @@ struct HomeView: View {
                     }
                     
                     // 内容
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         ZStack {
                             Circle()
                                 .fill(Color.white.opacity(0.25))
@@ -395,17 +395,18 @@ struct HomeView: View {
                         
                         VStack(spacing: 6) {
                             Text("Create New Story")
-                                .font(AppTheme.fontBold(size: 24))
+                                .font(AppTheme.fontBold(size: 22))
                                 .foregroundStyle(.white)
                             
                             Text("Tap to start your magical journey")
-                                .font(AppTheme.font(size: 14))
+                                .font(AppTheme.font(size: 13))
                                 .foregroundStyle(.white.opacity(0.9))
                         }
                     }
-                    .padding(.vertical, 40)
+                    .padding(.vertical, 22)
                 }
-                .frame(height: 220)
+                .frame(height: 165)
+                .frame(maxWidth: 340)
                 .scaleEffect(createButtonScale)
                 .shadow(color: Color(hex: "FF6A88").opacity(0.4), radius: 20, x: 0, y: 8)
             }
@@ -415,7 +416,8 @@ struct HomeView: View {
     
     // MARK: - 最近故事区域
     private var recentStoriesSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(spacing: 16) {
+            // 标题和“查看更多”
             HStack {
                 HStack(spacing: 8) {
                     Image(systemName: "book.fill")
@@ -444,6 +446,7 @@ struct HomeView: View {
                     .buttonStyle(ClickSoundButtonStyle())
                 }
             }
+            .frame(maxWidth: 340)
             
             if recentStories.isEmpty {
                 VStack(spacing: 16) {
@@ -452,16 +455,16 @@ struct HomeView: View {
                         .foregroundStyle(Color(hex: "D4A574").opacity(0.5))
                     
                     Text("No Stories Yet")
-                        .font(AppTheme.fontBold(size: 18))
+                        .font(AppTheme.fontBold(size: 17))
                         .foregroundStyle(Color(hex: "8B7355"))
                     
                     Text("Create your first magical story above!")
-                        .font(AppTheme.font(size: 14))
+                        .font(AppTheme.font(size: 13))
                         .foregroundStyle(Color(hex: "A0826D"))
                         .multilineTextAlignment(.center)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 48)
+                .frame(maxWidth: 340)
+                .padding(.vertical, 36)
                 .background(
                     RoundedRectangle(cornerRadius: 24)
                         .fill(Color.white.opacity(0.6))
@@ -479,6 +482,7 @@ struct HomeView: View {
                         }
                     }
                 }
+                .frame(maxWidth: 340)
             }
         }
     }
@@ -534,14 +538,14 @@ private struct EnhancedStoryRowButton: View {
                                         .tint(.white)
                                 )
                         }
-                        .frame(width: 72, height: 72)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .frame(width: 64, height: 64)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 14)
                                 .stroke(Color.white, lineWidth: 2)
                         )
                     } else {
-                        RoundedRectangle(cornerRadius: 16)
+                        RoundedRectangle(cornerRadius: 14)
                             .fill(
                                 LinearGradient(
                                     colors: [Color(hex: "A8E6CF"), Color(hex: "81C784")],
@@ -549,14 +553,14 @@ private struct EnhancedStoryRowButton: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 72, height: 72)
+                            .frame(width: 64, height: 64)
                             .overlay(
                                 Image(systemName: "book.fill")
                                     .font(AppTheme.font(size: 28))
                                     .foregroundStyle(.white)
                             )
                             .overlay(
-                                RoundedRectangle(cornerRadius: 16)
+                                RoundedRectangle(cornerRadius: 14)
                                     .stroke(Color.white, lineWidth: 2)
                             )
                     }
@@ -590,9 +594,9 @@ private struct EnhancedStoryRowButton: View {
                     .font(AppTheme.font(size: 16))
                     .foregroundStyle(Color(hex: "D4A574"))
             }
-            .padding(14)
+            .padding(12)
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 18)
                     .fill(Color.white)
                     .shadow(color: Color(hex: "D4A574").opacity(0.15), radius: 8, x: 0, y: 3)
             )
