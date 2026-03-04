@@ -54,11 +54,67 @@ struct StoryBookView: View {
                             Text("AI is creating a multi-page story for you. Please wait...").font(AppTheme.font(size: 14)).foregroundStyle(AppTheme.textSecondary)
                         }
                     } else if appOB.status == .failed {
-                        VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle.fill").font(AppTheme.font(size: 64)).foregroundStyle(Color.orange)
-                            Text("Generation Failed").font(AppTheme.font(size: 20)).foregroundStyle(AppTheme.textPrimary)
-                            Text("Please check your network connection or API configuration").font(AppTheme.font(size: 14)).foregroundStyle(AppTheme.textSecondary)
+                        VStack(spacing: 24) {
+                            // 图标
+                            ZStack {
+                                Circle()
+                                    .fill(Color(hex: "FFE5D9"))
+                                    .frame(width: 120, height: 120)
+                                    .shadow(color: Color(hex: "D4A574").opacity(0.3), radius: 12, x: 0, y: 4)
+                                
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(AppTheme.font(size: 56))
+                                    .foregroundStyle(Color(hex: "FF6B6B"))
+                            }
+                            
+                            // 标题
+                            Text("Generation Failed")
+                                .font(AppTheme.font(size: 28))
+                                .foregroundStyle(Color(hex: "5D4E37"))
+                                .fontWeight(.bold)
+                            
+                            // 描述
+                            VStack(spacing: 8) {
+                                Text("Sorry, something went wrong")
+                                    .font(AppTheme.font(size: 16))
+                                    .foregroundStyle(Color(hex: "8B7355"))
+                                Text("Please check your connection and try again")
+                                    .font(AppTheme.font(size: 14))
+                                    .foregroundStyle(Color(hex: "A89080"))
+                            }
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            
+                            // 重试按钮
+                            Button(action: {
+                                appState.backToHome()
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(AppTheme.font(size: 16))
+                                    Text("Back to Home")
+                                        .font(AppTheme.font(size: 18))
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 14)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Color(hex: "8B7355"), Color(hex: "5D4E37")],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .shadow(color: Color(hex: "D4A574").opacity(0.4), radius: 10, x: 0, y: 4)
+                                )
+                            }
+                            .buttonStyle(ClickSoundButtonStyle())
+                            .padding(.top, 8)
                         }
+                        .padding(.horizontal, 32)
                     } else {
                         VStack(spacing: 16) {
                             Text("📖").font(AppTheme.font(size: 64))
@@ -247,15 +303,7 @@ struct StoryPageView: View {
                         .frame(width: size.width, height: size.height)
                 }
                 
-                // 2. 遮罩层
-                LinearGradient(
-                    gradient: Gradient(colors: [.clear, .black.opacity(0.6)]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(width: size.width, height: size.height)
-                
-                // 3. 文本层和语音按钮：置于底部
+                // 2. 文本层和语音按钮：置于底部
                 VStack {
                     Spacer()
                     ZStack(alignment: .bottomTrailing) {

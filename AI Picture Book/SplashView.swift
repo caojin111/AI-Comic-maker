@@ -62,11 +62,24 @@ struct SplashView: View {
         .onAppear {
             print("[SplashView] onAppear, 开始动画")
             startAnimation()
+            playSplashSounds()
             
             // 2秒后跳转
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 appState.onSplashComplete()
             }
+        }
+    }
+    
+    private func playSplashSounds() {
+        // 第一个音效：口哨声（Logo 开始落下时）
+        AppSoundManager.shared.playSoundEffect(fileName: "mixkit-cartoon-toy-whistle-616", ext: "wav", subdirectory: "sound", volume: 0.7)
+        print("[SplashView] 播放口哨音效")
+        
+        // 第二个音效：铃铛声（Logo 第一次弹起时，接力播放，延迟 1.12 秒）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.62) {
+            AppSoundManager.shared.playSoundEffect(fileName: "mixkit-kids-cartoon-close-bells-2256", ext: "wav", subdirectory: "sound", volume: 0.7)
+            print("[SplashView] 播放铃铛音效")
         }
     }
     

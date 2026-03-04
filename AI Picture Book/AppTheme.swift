@@ -23,8 +23,8 @@ enum AppTheme {
         .custom(appFontNameBold, size: size)
     }
     
-    /// 行动唤起色 / 主题色（橙色 #FFB979）
-    static let primary = Color(hex: "FFB979")
+    /// 行动唤起色 / 主题色（橙色 #FFA63B）
+    static let primary = Color(hex: "FFA63B")
     
     /// 背景色（深紫色 #221750）
     static let bgPrimary = Color(hex: "221750")

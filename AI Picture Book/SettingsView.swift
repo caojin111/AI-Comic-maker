@@ -104,6 +104,7 @@ struct SettingsView: View {
 
 struct SettingsDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     let item: SettingsView.SettingsItem
 
     var body: some View {
@@ -111,7 +112,7 @@ struct SettingsDetailView: View {
             ScrollView {
                 Text(detailContent)
                     .font(AppTheme.font(size: 15))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(colorScheme == .dark ? .white : Color(hex: "5D4E37"))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(24)
             }
@@ -339,6 +340,12 @@ struct SettingsDetailView: View {
             15. Entire Agreement
             
             These Terms constitute the entire agreement between you and LazyCat regarding the use of the App and supersede all prior agreements and understandings.
+            
+            16. Governing Law and Apple Terms
+            
+            These terms are governed by the laws of the United States. Any disputes shall be resolved through friendly negotiation.
+            
+            Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
             
             By using AI Picture Book, you acknowledge that you have read, understood, and agree to be bound by these Terms of Use.
             """

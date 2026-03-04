@@ -22,6 +22,8 @@ struct PaywallView: View {
     private let yearlySavePercent = "60"
 
     @State private var selectedPlan: Plan = .yearly
+    @State private var showRestoreAlert = false
+    @State private var restoreAlertMessage = ""
 
     private var childNameForTitle: String {
         let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -31,17 +33,17 @@ struct PaywallView: View {
     private var billingDescription: String {
         switch selectedPlan {
         case .yearly:
-            return "$0.00 due today, then $39.99 billed every year"
+            return "$0.00 due today, then \(yearlyDisplayPrice) billed every year"
         case .monthly:
-            return "$9.99 due today, then $9.99 billed every month"
+            return "\(monthlyDisplayPrice) due today, then \(monthlyDisplayPrice) billed every month"
         }
     }
 
     private let benefits: [(icon: String, text: String)] = [
-        ("book.pages.fill", "Unlimited AI storybooks"),
-        ("wand.and.stars", "New characters & themes"),
-        ("speaker.wave.2.fill", "Read-aloud for every page"),
-        ("photo.stack.fill", "Custom illustrations per story")
+        ("book.pages.fill", "Create personalized storybooks"),
+        ("square.stack.3d.up.fill", "Unlimited story storage"),
+        ("speaker.wave.2.fill", "Expressive voice narration"),
+        ("sparkles", "Ad-free, pure enjoyment")
     ]
 
     private func productID(for plan: Plan) -> PurchaseManager.ProductID {
@@ -102,30 +104,76 @@ struct PaywallView: View {
 
     var body: some View {
         ZStack {
-            AppTheme.bgPrimary
-                .ignoresSafeArea()
+            // 艺术感渐变背景
+            LinearGradient(
+                colors: [
+                    Color(hex: "05C187"),
+                    Color(hex: "04A870"),
+                    Color(hex: "038F5E")
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            // 装饰性圆形元素（增加设计感）
+            GeometryReader { geo in
+                // 左上角大圆
+                Circle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(width: 280, height: 280)
+                    .offset(x: -100, y: -80)
+                
+                // 右上角中圆
+                Circle()
+                    .fill(Color(hex: "FFF07F").opacity(0.12))
+                    .frame(width: 180, height: 180)
+                    .offset(x: geo.size.width - 80, y: 50)
+                
+                // 左下角小圆
+                Circle()
+                    .fill(Color(hex: "D0FBC3").opacity(0.15))
+                    .frame(width: 150, height: 150)
+                    .offset(x: -40, y: geo.size.height - 100)
+                
+                // 右下角装饰圆
+                Circle()
+                    .fill(Color.white.opacity(0.06))
+                    .frame(width: 200, height: 200)
+                    .offset(x: geo.size.width - 60, y: geo.size.height - 80)
+                
+                // Thumb 图片 - 放在左上角作为装饰，半透明
+                Image("thumb")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200, height: 200)
+                    .rotationEffect(.degrees(-10))
+                    .offset(x: -30, y: -20)
+                    .opacity(0.4)
+                
+                // Sleep 图片 - 放在右下角作为装饰，半透明，镜像反转
+                Image("sleep")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 270, height: 270)
+                    .scaleEffect(x: -1, y: 1)
+                    .rotationEffect(.degrees(10))
+                    .offset(x: geo.size.width - 200, y: geo.size.height - 200)
+                    .opacity(0.4)
+            }
+            .allowsHitTesting(false)
 
             ScrollView {
                 VStack(spacing: 18) {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            appState.dismissPaywall()
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(AppTheme.font(size: 32))
-                                .foregroundStyle(AppTheme.textSecondary)
-                        }
-                        .buttonStyle(ClickSoundButtonStyle())
-                        .padding(.trailing, 20)
-                        .padding(.top, 6)
-                    }
+                    // 顶部留白，保持视觉平衡
+                    Spacer()
+                        .frame(height: 20)
 
-                    (Text("Ready to read with ").font(AppTheme.font(size: 26)).foregroundStyle(AppTheme.textPrimary) + Text(childNameForTitle).font(AppTheme.font(size: 26)).foregroundStyle(Color(hex: "FEB979")) + Text("?").font(AppTheme.font(size: 26)).foregroundStyle(AppTheme.textPrimary))
+                    (Text("Ready to read with ").font(AppTheme.font(size: 26)).foregroundStyle(.white) + Text(childNameForTitle).font(AppTheme.font(size: 26)).foregroundStyle(Color(hex: "FEB979")) + Text("?").font(AppTheme.font(size: 26)).foregroundStyle(.white))
                         .multilineTextAlignment(.center)
                     Text("Choose the plan that works for you")
                         .font(AppTheme.font(size: 16))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(.white)
                         .padding(.bottom, 4)
 
                     // Benefits with icons
@@ -138,12 +186,12 @@ struct PaywallView: View {
                                     .frame(width: 28, alignment: .center)
                                 Text(item.text)
                                     .font(AppTheme.font(size: 15))
-                                    .foregroundStyle(AppTheme.textPrimary)
+                                    .foregroundStyle(Color(hex: "03412E"))
                                 Spacer()
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                            .background(Color(hex: "D0FBC3"), in: RoundedRectangle(cornerRadius: 12))
                         }
                     }
                     .padding(.horizontal, 24)
@@ -171,7 +219,7 @@ struct PaywallView: View {
                     // Billing description below plan selection
                     Text(billingDescription)
                         .font(AppTheme.font(size: 13))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                         .padding(.top, 2)
@@ -199,11 +247,21 @@ struct PaywallView: View {
                         print("[PaywallView] Restore purchases")
                         Task {
                             await purchaseManager.restorePurchases()
+                            // 恢复后检查订阅状态
+                            let hasSubscription = await purchaseManager.hasActiveSubscription()
+                            if hasSubscription {
+                                print("[PaywallView] 恢复购买成功，有有效订阅")
+                                appState.dismissPaywall()
+                            } else {
+                                print("[PaywallView] 恢复购买完成，但未找到有效订阅")
+                                restoreAlertMessage = "No active subscription found. Please check your purchase history or contact support."
+                                showRestoreAlert = true
+                            }
                         }
                     }) {
                         Text("Restore purchases")
                             .font(AppTheme.font(size: 14))
-                            .foregroundStyle(AppTheme.textSecondary)
+                            .foregroundStyle(.white)
                             .underline()
                     }
                     .buttonStyle(ClickSoundButtonStyle())
@@ -214,12 +272,12 @@ struct PaywallView: View {
                         // How your free trial works
                         Text("How your free trial works")
                             .font(AppTheme.fontBold(size: 18))
-                            .foregroundStyle(AppTheme.textPrimary)
+                            .foregroundStyle(.white)
                         VStack(spacing: 16) {
                             // Simple arrow bar to echo the reference style
                             ZStack(alignment: .leading) {
                                 RoundedRectangle(cornerRadius: 999)
-                                    .fill(Color.white.opacity(0.18))
+                                    .fill(Color(hex: "FFF07F"))
                                     .frame(height: 12)
                                 RoundedRectangle(cornerRadius: 999)
                                     .fill(AppTheme.primary)
@@ -229,45 +287,45 @@ struct PaywallView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Today")
                                         .font(AppTheme.fontBold(size: 15))
-                                        .foregroundStyle(AppTheme.textPrimary)
+                                        .foregroundStyle(Color(hex: "03412E"))
                                     Text("Get instant access and start learning!")
                                         .font(AppTheme.font(size: 13))
-                                        .foregroundStyle(AppTheme.textSecondary)
+                                        .foregroundStyle(Color(hex: "03412E"))
                                 }
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Day 5")
                                         .font(AppTheme.fontBold(size: 15))
-                                        .foregroundStyle(AppTheme.textPrimary)
+                                        .foregroundStyle(Color(hex: "03412E"))
                                     Text("We'll remind you that your trial is ending by email.")
                                         .font(AppTheme.font(size: 13))
-                                        .foregroundStyle(AppTheme.textSecondary)
+                                        .foregroundStyle(Color(hex: "03412E"))
                                 }
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Day 7")
                                         .font(AppTheme.fontBold(size: 15))
-                                        .foregroundStyle(AppTheme.textPrimary)
+                                        .foregroundStyle(Color(hex: "03412E"))
                                     Text("Your subscription starts.\nCancel any time.")
                                         .font(AppTheme.font(size: 13))
-                                        .foregroundStyle(AppTheme.textSecondary)
+                                        .foregroundStyle(Color(hex: "03412E"))
                                 }
                             }
                         }
                         .padding(16)
-                        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+                        .background(Color(hex: "D0FBC3"), in: RoundedRectangle(cornerRadius: 16))
 
                         // How can I cancel?
                         Text("How can I cancel?")
                             .font(AppTheme.fontBold(size: 18))
-                            .foregroundStyle(AppTheme.textPrimary)
+                            .foregroundStyle(.white)
                             .padding(.top, 8)
                         Text("""
-It's easy: Open the AI Picture Book app, tap Settings at the top right, and then \"Cancel Free Trial.\" Now you're in your App Store Subscriptions. Select AI Picture Book, \"Cancel Trial\" and confirm.
+It's easy: Go to your iPhone Settings, tap your Apple ID at the top, select "Subscriptions," find AI Picture Book, and tap "Cancel Subscription." You can cancel anytime before the trial ends.
 """)
                         .font(AppTheme.font(size: 13))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(Color(hex: "03412E"))
                         .multilineTextAlignment(.leading)
                         .padding(16)
-                        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+                        .background(Color(hex: "D0FBC3"), in: RoundedRectangle(cornerRadius: 16))
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 24)
@@ -275,21 +333,27 @@ It's easy: Open the AI Picture Book app, tap Settings at the top right, and then
                     // Terms & Privacy links at the very bottom
                     HStack(spacing: 24) {
                         Button(action: {
+                            if let url = URL(string: "https://docs.qq.com/doc/p/e3df6a83dbc7dc08ef8a5ee99267cee9f0588550") {
+                                UIApplication.shared.open(url)
+                            }
                             print("[PaywallView] Terms of Use tapped")
                         }) {
                             Text("Terms of Use")
                                 .font(AppTheme.font(size: 13))
-                                .foregroundStyle(AppTheme.textSecondary)
+                                .foregroundStyle(.white)
                                 .underline()
                         }
                         .buttonStyle(ClickSoundButtonStyle())
 
                         Button(action: {
+                            if let url = URL(string: "https://docs.qq.com/doc/p/6902accfcd5d641bad0a6169342c88ecb6666aad") {
+                                UIApplication.shared.open(url)
+                            }
                             print("[PaywallView] Privacy Policy tapped")
                         }) {
                             Text("Privacy Policy")
                                 .font(AppTheme.font(size: 13))
-                                .foregroundStyle(AppTheme.textSecondary)
+                                .foregroundStyle(.white)
                                 .underline()
                         }
                         .buttonStyle(ClickSoundButtonStyle())
@@ -306,40 +370,74 @@ It's easy: Open the AI Picture Book app, tap Settings at the top right, and then
                 }
             }
         }
+        .alert("Restore Purchases", isPresented: $showRestoreAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(restoreAlertMessage)
+        }
+        .onDisappear {
+            // 离开 Paywall 时停止 OB 背景音乐
+            BackgroundMusicManager.shared.stop()
+            print("[PaywallView] 停止 OB 背景音乐")
+        }
     }
 
     @ViewBuilder
     private func planCard(plan: Plan, title: String, price: String, period: String, badge: String?) -> some View {
         let isSelected = selectedPlan == plan
+        let bonusCoins = plan == .yearly ? 200 : 50
+        
         Button(action: {
             selectedPlan = plan
         }) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
-                        Text(title)
-                            .font(AppTheme.font(size: 18))
-                            .foregroundStyle(AppTheme.textOnLight)
-                        if let badge = badge {
-                            Text(badge)
-                                .font(AppTheme.font(size: 12))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.green, in: RoundedRectangle(cornerRadius: 6))
+            VStack(spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 8) {
+                            Text(title)
+                                .font(AppTheme.font(size: 18))
+                                .foregroundStyle(AppTheme.textOnLight)
+                            if let badge = badge {
+                                Text(badge)
+                                    .font(AppTheme.font(size: 12))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.green, in: RoundedRectangle(cornerRadius: 6))
+                            }
                         }
+                        Text(period)
+                            .font(AppTheme.font(size: 13))
+                            .foregroundStyle(Color.gray)
                     }
-                    Text(period)
-                        .font(AppTheme.font(size: 13))
-                        .foregroundStyle(Color.gray)
+                    Spacer()
+                    Text(price)
+                        .font(AppTheme.font(size: 18))
+                        .foregroundStyle(AppTheme.primary)
                 }
-                Spacer()
-                Text(price)
-                    .font(AppTheme.font(size: 18))
-                    .foregroundStyle(AppTheme.primary)
+                .padding(20)
+                
+                // 小鱼干奖励横幅
+                HStack(spacing: 6) {
+                    Image("fish coin")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                    
+                    Text("Get \(bonusCoins) bonus fish coins!")
+                        .font(AppTheme.fontBold(size: 13))
+                        .foregroundStyle(.white)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    LinearGradient(
+                        colors: [Color(hex: "FFB84D"), Color(hex: "FF9A8B")],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
             }
-            .padding(20)
-            .frame(maxWidth: .infinity)
             .background(Color.white, in: RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)

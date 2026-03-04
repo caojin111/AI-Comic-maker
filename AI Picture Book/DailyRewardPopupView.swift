@@ -46,9 +46,10 @@ struct DailyRewardPopupView: View {
                                 .fill(Color.white.opacity(0.25))
                                 .frame(width: 80, height: 80)
                             
-                            Image(systemName: "fish.fill")
-                                .font(AppTheme.font(size: 40))
-                                .foregroundStyle(.white)
+                            Image("fish coin")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
                                 .rotationEffect(.degrees(showContent ? 10 : -10))
                                 .animation(
                                     Animation.easeInOut(duration: 0.5)
@@ -74,9 +75,10 @@ struct DailyRewardPopupView: View {
                             .foregroundStyle(Color(hex: "5D4E37"))
                         
                         HStack(spacing: 8) {
-                            Image(systemName: "fish.fill")
-                                .font(AppTheme.font(size: 32))
-                                .foregroundStyle(Color(hex: "FFB84D"))
+                            Image("fish coin")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
                             
                             Text("\(rewardAmount)")
                                 .font(AppTheme.fontBold(size: 48))

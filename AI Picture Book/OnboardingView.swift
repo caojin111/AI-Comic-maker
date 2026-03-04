@@ -391,6 +391,9 @@ struct OBNamePage: View {
 
 struct OBNameMotivationContent: View {
     @Environment(AppState.self) private var appState
+    @State private var imageScale: CGFloat = 0.5
+    @State private var imageOpacity: Double = 0
+    
     private var childName: String {
         let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
         return name.isEmpty ? "your child" : name
@@ -404,8 +407,15 @@ struct OBNameMotivationContent: View {
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
                     .frame(height: 180)
-                    .scaleEffect(1.5)
+                    .scaleEffect(1.5 * imageScale)
+                    .opacity(imageOpacity)
                     .offset(y: -30)
+                    .onAppear {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                            imageScale = 1.0
+                            imageOpacity = 1.0
+                        }
+                    }
                 
                 HStack(spacing: 12) {
                     if let avatar = appState.childAvatar {
@@ -504,6 +514,8 @@ struct OBRelationshipMotivationContent: View {
     @State private var avatarsVisible: Bool = false
     /// 头像移动完成后才显示 x and y 文案
     @State private var showXAndYText: Bool = false
+    /// 是否已播放碰撞音效
+    @State private var hasPlayedCollisionSound: Bool = false
 
     private var childName: String {
         let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -511,7 +523,7 @@ struct OBRelationshipMotivationContent: View {
     }
     private var relationshipText: String {
         guard let rel = appState.childRelationship else { return "Parent" }
-        return rel.rawValue
+        return rel == .other ? "You" : rel.rawValue
     }
     private let avatarCircleSize: CGFloat = 80
     private var childLottieSize: CGFloat { avatarCircleSize * 1.2 }
@@ -615,6 +627,14 @@ struct OBRelationshipMotivationContent: View {
                     avatarsVisible = true
                     withAnimation(.easeIn(duration: 0.7)) {
                         avatarPhase = 1
+                    }
+                }
+                // 在两个头像相撞的一瞬间（phase 1 达到时）播放音效
+                DispatchQueue.main.asyncAfter(deadline: .now() + pageFlipDuration + 0.7) {
+                    if !hasPlayedCollisionSound {
+                        hasPlayedCollisionSound = true
+                        AppSoundManager.shared.playSoundEffect(fileName: "OBxandy", ext: "wav", subdirectory: "sound", volume: 0.8)
+                        print("[OBRelationshipMotivation] 播放头像碰撞音效")
                     }
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + pageFlipDuration + 0.75) {
@@ -791,6 +811,7 @@ private struct OBPersonalizingProgressRow: View {
 
 struct OBAllSetUpPage: View {
     @Environment(AppState.self) private var appState
+    @State private var hasPlayedApplauseSound: Bool = false
     
     private var childName: String {
         let name = appState.childName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -811,6 +832,14 @@ struct OBAllSetUpPage: View {
                         )
                         .frame(width: geo.size.width, height: geo.size.height * 0.5)
                         .allowsHitTesting(false)
+                        .onAppear {
+                            // 彩带动画出现时播放掌声音效
+                            if !hasPlayedApplauseSound {
+                                hasPlayedApplauseSound = true
+                                AppSoundManager.shared.playSoundEffect(fileName: "mixkit-animated-small-group-applause-523", ext: "wav", subdirectory: "sound", volume: 0.7)
+                                print("[OBAllSetUp] 播放掌声音效")
+                            }
+                        }
                     }
                     .frame(height: geo.size.height * 0.5)
                     Spacer(minLength: 0)
@@ -1005,11 +1034,17 @@ private struct OBChartMotivationChartView: View {
             withAnimation(.easeOut(duration: 1.2)) {
                 lineTrim = 1
             }
+            // 折线出场时播放 funnel_1.wav
+            AppSoundManager.shared.playSoundEffect(fileName: "funnel_1", ext: "wav", subdirectory: "sound", volume: 0.6)
+            print("[OBChartMotivation] 播放折线出场音效 funnel_1.wav")
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + lineStart + 0.7) {
             withAnimation(.easeOut(duration: 0.5)) {
                 showLineAndAvatar = true
             }
+            // 孩子头像出场时播放 funnel_2.wav
+            AppSoundManager.shared.playSoundEffect(fileName: "funnel_2", ext: "wav", subdirectory: "sound", volume: 0.6)
+            print("[OBChartMotivation] 播放头像出场音效 funnel_2.wav")
         }
     }
 
@@ -1184,6 +1219,7 @@ private struct OBProgressSparklesOverlay: View {
 
 struct OBFlowContainerView: View {
     @Environment(AppState.self) private var appState
+    @State private var hasStartedOBMusic = false
     
     private static func stepAndBack(for page: AppPage) -> (step: Int, showBack: Bool) {
         switch page {
@@ -1299,6 +1335,12 @@ struct OBFlowContainerView: View {
         }
         .onAppear {
             setOrientation(.portrait)
+            // 启动 OB 背景音乐
+            if !hasStartedOBMusic {
+                hasStartedOBMusic = true
+                BackgroundMusicManager.shared.playMusic(fileName: "mixkit-be-happy-2-823", ext: "mp3", subdirectory: "music", volume: 0.25, loops: true)
+                print("[OBFlowContainer] 开始播放 OB 背景音乐")
+            }
         }
     }
     

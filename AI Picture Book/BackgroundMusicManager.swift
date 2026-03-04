@@ -19,6 +19,35 @@ final class BackgroundMusicManager: ObservableObject {
 
     private init() {}
 
+    /// 播放指定的背景音乐文件
+    /// - Parameters:
+    ///   - fileName: 文件名（不含扩展名）
+    ///   - ext: 扩展名（默认 "mp3"）
+    ///   - subdirectory: 子目录（默认 "music"）
+    ///   - volume: 音量（0.0-1.0，默认 0.3）
+    ///   - loops: 是否循环（默认 true）
+    func playMusic(fileName: String, ext: String = "mp3", subdirectory: String? = "music", volume: Float = 0.3, loops: Bool = true) {
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: ext, subdirectory: subdirectory)
+            ?? Bundle.main.url(forResource: fileName, withExtension: ext) else {
+            print("[BackgroundMusicManager] 未找到音乐文件: \(fileName).\(ext)")
+            return
+        }
+        stop()
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.numberOfLoops = loops ? -1 : 0
+            player?.volume = volume
+            player?.prepareToPlay()
+            player?.play()
+            isPlaying = true
+            print("[BackgroundMusicManager] 播放音乐: \(fileName).\(ext)")
+        } catch {
+            print("[BackgroundMusicManager] 播放音乐失败: \(error)")
+        }
+    }
+
     /// Start playing a random track from the music folder. Loops until stopped.
     func playRandomTrack() {
         guard let url = randomMusicURL() else {

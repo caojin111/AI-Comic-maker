@@ -175,11 +175,13 @@ struct ThemeInputModalView: View {
                             }
                         }) {
                             HStack(spacing: 6) {
+                                Text("Create")
+                                    .font(AppTheme.fontBold(size: 16))
                                 Image("fish coin")
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 16, height: 16)
-                                Text("Create (10)")
+                                    .frame(width: 20, height: 20)
+                                Text("x10")
                                     .font(AppTheme.fontBold(size: 16))
                             }
                             .foregroundStyle(.white)

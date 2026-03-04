@@ -187,6 +187,17 @@ struct HomeView: View {
         .onAppear {
             print("[HomeView] onAppear")
             setOrientation(.portrait)
+            
+            // 检查订阅状态，未订阅则跳转到 Paywall
+            Task {
+                let hasSubscription = await PurchaseManager.shared.hasActiveSubscription()
+                if !hasSubscription {
+                    print("[HomeView] 用户未订阅，跳转到 Paywall")
+                    appState.currentPage = .paywall
+                    return
+                }
+            }
+            
             fishCoinBalance = fishCoinManager.balance
             recentStories = StoryStorage.shared.loadAll()
             startCreateButtonAnimation()

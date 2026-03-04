@@ -181,13 +181,14 @@ final class AppState {
         }
         
         obPendingSparkles = true
-        print("[AppState] requestOBNextPage, 直接跳转下一页")
+        print("[AppState] requestOBNextPage, 立即跳转下一页")
         
-        // 短暂延迟后跳转，给用户一个视觉反馈
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-            guard let self = self else { return }
-            self.obPendingSparkles = false
-            self.nextOnboardingPage()
+        // 立即跳转，不延迟
+        self.nextOnboardingPage()
+        
+        // 短暂锁定后解锁，防止重复点击
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.obPendingSparkles = false
         }
     }
 
@@ -244,11 +245,23 @@ final class AppState {
         print("[AppState] previousOnboardingPage -> \(currentPage)")
     }
 
-    /// Paywall 关闭或订阅完成后进入首页
+    /// 订阅完成后进入首页（仅在购买成功后调用）
     func dismissPaywall() {
         hasCompletedOnboarding = true
         currentPage = .home
         print("[AppState] dismissPaywall -> home")
+    }
+    
+    /// 检查订阅状态，未订阅则跳转到 Paywall
+    func checkSubscriptionAndNavigate() async {
+        let hasSubscription = await PurchaseManager.shared.hasActiveSubscription()
+        if hasSubscription {
+            print("[AppState] 用户已订阅，允许进入首页")
+            currentPage = .home
+        } else {
+            print("[AppState] 用户未订阅，跳转到 Paywall")
+            currentPage = .paywall
+        }
     }
     
     /// 开始故事创作（从首页点击开始按钮）
@@ -298,8 +311,11 @@ final class AppState {
     /// 启动页结束后决定跳转
     func onSplashComplete() {
         if hasCompletedOnboarding {
-            currentPage = .home
-            print("[AppState] onSplashComplete -> home (already onboarded)")
+            // 已完成 OB，但需要检查订阅状态
+            Task {
+                await checkSubscriptionAndNavigate()
+            }
+            print("[AppState] onSplashComplete -> 检查订阅状态")
         } else {
             currentPage = .obGetStarted
             print("[AppState] onSplashComplete -> obGetStarted")

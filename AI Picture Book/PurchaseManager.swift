@@ -65,22 +65,35 @@ final class PurchaseManager {
         }
         do {
             let ids = Set(ProductID.allCases.map { $0.rawValue })
-            print("[PurchaseManager] 请求商品信息: \(ids)")
+            print("[PurchaseManager] 🔍 开始请求商品信息...")
+            print("[PurchaseManager] 📦 请求的 Product IDs: \(ids)")
+            print("[PurchaseManager] 📱 Bundle ID: \(Bundle.main.bundleIdentifier ?? "未知")")
+            
             products = try await Product.products(for: ids)
+            
             print("[PurchaseManager] ✅ 已加载 \(products.count) 个商品:")
             for product in products {
                 print("[PurchaseManager]   - ID: \(product.id)")
                 print("[PurchaseManager]     价格: \(product.displayPrice)")
                 print("[PurchaseManager]     类型: \(product.type)")
             }
+            
             if products.isEmpty {
-                print("[PurchaseManager] ⚠️ 警告：未加载到任何商品！请检查：")
-                print("[PurchaseManager]   1. Product ID 是否在 App Store Connect 中正确配置")
-                print("[PurchaseManager]   2. 是否已在 Xcode 中配置 StoreKit Configuration File")
-                print("[PurchaseManager]   3. 沙盒环境是否正确设置")
+                print("[PurchaseManager] ⚠️ 警告：未加载到任何商品！")
+                print("[PurchaseManager] 📋 排查清单：")
+                print("[PurchaseManager]   1. App Store Connect 中 Bundle ID 是否为: \(Bundle.main.bundleIdentifier ?? "未知")")
+                print("[PurchaseManager]   2. 商品状态是否为「准备提交」（不能是草稿）")
+                print("[PurchaseManager]   3. 付费 App 协议是否已签署")
+                print("[PurchaseManager]   4. Xcode Scheme → StoreKit Configuration 是否设置为 None")
+                print("[PurchaseManager]   5. 设备是否登录沙盒账号（设置 → App Store → 沙盒账户）")
+                print("[PurchaseManager]   6. 是否在真机上测试（模拟器不支持沙盒支付）")
             }
         } catch {
-            print("[PurchaseManager] ❌ 加载商品失败: \(error)")
+            print("[PurchaseManager] ❌ 加载商品失败，错误详情: \(error)")
+            print("[PurchaseManager] 错误类型: \(type(of: error))")
+            if let storeError = error as? StoreKitError {
+                print("[PurchaseManager] StoreKit 错误: \(storeError)")
+            }
         }
     }
 
@@ -128,6 +141,27 @@ final class PurchaseManager {
             }
         } catch {
             print("[PurchaseManager] 恢复购买失败: \(error)")
+        }
+    }
+    
+    /// 检查用户是否有有效订阅
+    func hasActiveSubscription() async -> Bool {
+        print("[PurchaseManager] 检查订阅状态...")
+        do {
+            for await result in Transaction.currentEntitlements {
+                guard case .verified(let transaction) = result else { continue }
+                // 检查是否是订阅商品（月度或年度）
+                if transaction.productID == ProductID.monthly.rawValue || 
+                   transaction.productID == ProductID.yearly.rawValue {
+                    print("[PurchaseManager] ✅ 找到有效订阅: \(transaction.productID)")
+                    return true
+                }
+            }
+            print("[PurchaseManager] ❌ 未找到有效订阅")
+            return false
+        } catch {
+            print("[PurchaseManager] 检查订阅状态失败: \(error)")
+            return false
         }
     }
 }
