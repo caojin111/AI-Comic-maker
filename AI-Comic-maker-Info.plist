@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Baloo2-Medium.ttf</string>
+		<string>Baloo2-Bold.ttf</string>
+		<string>Rowdies-Bold.ttf</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs access to your local network to generate comics.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_https._tcp</string>
+	</array>
+	<key>NSAllowsArbitraryLoads</key>
+	<true/>
+	<key>NSAllowsArbitraryLoadsInWebContent</key>
+	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>AI Comic Maker needs access to save your generated comics to Photos.</string>
+	<key>SUPABASE_JWT_TOKEN</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlhamh3cmhyamV2eXpiaG95aHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzODE5MTIsImV4cCI6MjA4NTk1NzkxMn0.mb335WseDloKGnqR02aUetm_Ne37uh1LB5sDQroTW7o</string>
+</dict>
+</plist>

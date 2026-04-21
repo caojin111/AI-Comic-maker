@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "jimeng-2026-03-19-3918-美国漫画以多格不规则分镜呈现，采用充满活力的霓虹色系。一只身着复古太空服的年轻人... 1.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "jimeng-2026-03-19-3918-美国漫画以多格不规则分镜呈现，采用充满活力的霓虹色系。一只身着复古太空服的年轻人... 2.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "jimeng-2026-03-19-3918-美国漫画以多格不规则分镜呈现，采用充满活力的霓虹色系。一只身着复古太空服的年轻人... 3.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

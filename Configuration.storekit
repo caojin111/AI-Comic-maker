@@ -10,13 +10,13 @@
       "internalID" : "6740097005",
       "localizations" : [
         {
-          "description" : "5 Fish Coins",
-          "displayName" : "5 Fish Coins",
+          "description" : "30 Fish Coins",
+          "displayName" : "30 Fish Coins",
           "locale" : "en_US"
         }
       ],
-      "productID" : "coins_1",
-      "referenceName" : "5 Fish Coins",
+      "productID" : "comic_fish_0.99",
+      "referenceName" : "30 Fish Coins",
       "type" : "Consumable"
     },
     {
@@ -25,13 +25,13 @@
       "internalID" : "6740097006",
       "localizations" : [
         {
-          "description" : "18 Fish Coins",
-          "displayName" : "18 Fish Coins",
+          "description" : "120 Fish Coins",
+          "displayName" : "120 Fish Coins",
           "locale" : "en_US"
         }
       ],
-      "productID" : "coins_2",
-      "referenceName" : "18 Fish Coins",
+      "productID" : "comic_fish_2.99",
+      "referenceName" : "120 Fish Coins",
       "type" : "Consumable"
     },
     {
@@ -40,13 +40,13 @@
       "internalID" : "6740097007",
       "localizations" : [
         {
-          "description" : "50 Fish Coins",
-          "displayName" : "50 Fish Coins",
+          "description" : "350 Fish Coins",
+          "displayName" : "350 Fish Coins",
           "locale" : "en_US"
         }
       ],
-      "productID" : "coins_3",
-      "referenceName" : "50 Fish Coins",
+      "productID" : "comic_fish_6.99",
+      "referenceName" : "350 Fish Coins",
       "type" : "Consumable"
     },
     {
@@ -55,13 +55,13 @@
       "internalID" : "6740097008",
       "localizations" : [
         {
-          "description" : "120 Fish Coins",
-          "displayName" : "120 Fish Coins",
+          "description" : "1000 Fish Coins",
+          "displayName" : "1000 Fish Coins",
           "locale" : "en_US"
         }
       ],
-      "productID" : "coins_4",
-      "referenceName" : "120 Fish Coins",
+      "productID" : "comic_fish_14.99",
+      "referenceName" : "1000 Fish Coins",
       "type" : "Consumable"
     }
   ],
@@ -135,9 +135,38 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "39.99",
+          "displayPrice" : "4.99",
           "familyShareable" : false,
           "groupNumber" : 1,
+          "internalID" : "6740097010",
+          "introductoryOffer" : {
+            "internalID" : "6740097011",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Unlimited AI storybooks for one week",
+              "displayName" : "Weekly Plan",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "Comic_weekly",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly Plan",
+          "subscriptionGroupID" : "21543210",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "34.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
           "internalID" : "6740097001",
           "introductoryOffer" : {
             "internalID" : "6740097002",
@@ -151,7 +180,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "yearlyplan_29.99",
+          "productID" : "Comic_yearly",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Yearly Plan",
           "subscriptionGroupID" : "21543210",
@@ -166,7 +195,7 @@
           ],
           "displayPrice" : "9.99",
           "familyShareable" : false,
-          "groupNumber" : 2,
+          "groupNumber" : 3,
           "internalID" : "6740097003",
           "introductoryOffer" : {
             "internalID" : "6740097004",
@@ -180,7 +209,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "monthlyplan_14.99",
+          "productID" : "Comic_monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Monthly Plan",
           "subscriptionGroupID" : "21543210",

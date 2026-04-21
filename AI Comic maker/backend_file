@@ -1,0 +1,9 @@
+字段名	类型	必填	说明	示例
+theme	String	是	用户输入的故事内容/主题	"A detective find a cat"
+characterName	String	是	用户设定的角色名字	"Aria"
+gender	String	是	角色性别 (影响代词)	"female"
+visualAnchor	String	是	核心：该角色的视觉特征描述	"Silver hair, yellow jacket..."
+style	String	是	用户选的画风代码	"manga"
+format	String	是	漫画排版格式	"4-panel"
+quantity	Int	是	生成的分镜格数	4
+language	String	是	对白所用的语言	"中文"
