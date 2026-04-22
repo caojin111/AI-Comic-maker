@@ -353,9 +353,11 @@ private struct CoinProductCard: View {
             ]
         )
         isPurchasing = true
-        let success = await purchaseManager.purchase(product)
+        let purchaseResult = await purchaseManager.purchase(product)
         isPurchasing = false
-        if success {
+
+        switch purchaseResult {
+        case .purchased:
             FishCoinManager.shared.addCoins(coins)
             AnalyticsManager.track(
                 AnalyticsEvent.fishCoinPurchaseSucceeded,
@@ -367,7 +369,7 @@ private struct CoinProductCard: View {
                 ]
             )
             await MainActor.run { dismiss() }
-        } else {
+        case .userCancelled:
             AnalyticsManager.track(
                 AnalyticsEvent.fishCoinPurchaseFailed,
                 properties: [
@@ -375,9 +377,43 @@ private struct CoinProductCard: View {
                     "coins": coins,
                     "price": product.displayPrice,
                     "label": label,
-                    "reason": "purchase_not_completed"
+                    "reason": "user_cancelled"
                 ]
             )
+        case .pending:
+            AnalyticsManager.track(
+                AnalyticsEvent.fishCoinPurchaseFailed,
+                properties: [
+                    "product_id": product.id,
+                    "coins": coins,
+                    "price": product.displayPrice,
+                    "label": label,
+                    "reason": "pending"
+                ]
+            )
+        case .failed(let reason):
+            AnalyticsManager.track(
+                AnalyticsEvent.fishCoinPurchaseFailed,
+                properties: [
+                    "product_id": product.id,
+                    "coins": coins,
+                    "price": product.displayPrice,
+                    "label": label,
+                    "reason": reason
+                ]
+            )
+        case .alreadyActive(let tier):
+            AnalyticsManager.track(
+                AnalyticsEvent.fishCoinPurchaseFailed,
+                properties: [
+                    "product_id": product.id,
+                    "coins": coins,
+                    "price": product.displayPrice,
+                    "label": label,
+                    "reason": "unexpected_subscription_state_\(tier.rawValue)"
+                ]
+            )
+            print("[CoinProductCard] 鱼币商品购买返回了订阅状态，tier=\(tier.rawValue)")
         }
     }
 }

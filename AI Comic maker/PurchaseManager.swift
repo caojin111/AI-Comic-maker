@@ -45,6 +45,9 @@ final class PurchaseManager {
         case failed(reason: String)
     }
 
+    var products: [Product] = []
+    var isPurchasing: Bool = false
+    private var transactionUpdateTask: Task<Void, Never>?
 
     private init() {
         Task {
